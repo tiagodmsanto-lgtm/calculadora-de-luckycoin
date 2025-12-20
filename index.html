@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Trade - Lucky Coin vs KK</title>
+    <title>Calculadora RavenQuest - Lucky Coin vs KK</title>
     <style>
         :root {
             --bg-color: #1a1a2e;
@@ -34,7 +34,6 @@
             box-shadow: 0 8px 16px rgba(0,0,0,0.3);
             width: 100%;
             max-width: 500px;
-            position: relative; /* Necessário para posicionamentos absolutos se usar */
         }
 
         h2 {
@@ -54,15 +53,39 @@
             color: #b0b0b0;
         }
 
+        /* Wrapper para colocar o ícone junto com o input */
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper img {
+            position: absolute;
+            left: 12px;
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+            pointer-events: none; /* O clique passa através da imagem */
+        }
+
         input {
             width: 100%;
             padding: 10px;
+            /* Adiciona espaço na esquerda se tiver ícone, senão padrão */
+            padding-left: 12px; 
             border: 2px solid var(--accent-color);
             background-color: #0f182b;
             color: white;
             border-radius: 6px;
             box-sizing: border-box;
             font-size: 1rem;
+            transition: 0.3s;
+        }
+
+        /* Classe específica para inputs que têm ícone */
+        input.has-icon {
+            padding-left: 45px; /* Espaço para o ícone */
         }
 
         input:focus {
@@ -100,6 +123,8 @@
             margin-bottom: 10px;
             padding-bottom: 10px;
             border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: space-between;
         }
 
         .verdict {
@@ -122,7 +147,6 @@
             font-style: italic;
         }
 
-        /* Estilo da Marca Registrada */
         .branding {
             margin-top: 25px;
             padding-top: 15px;
@@ -136,14 +160,13 @@
         .branding strong {
             color: var(--highlight);
             font-weight: 700;
-            letter-spacing: 0.5px;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Calculadora de Trade - Lucky Coin vs KK</h2>
+    <h2>Calculadora de Economia</h2>
     
     <div class="input-group">
         <label>Preço do Pacote de Lucky Coins (R$)</label>
@@ -152,27 +175,38 @@
 
     <div class="input-group">
         <label>Quantidade de Lucky Coins no Pacote</label>
-        <input type="number" id="qtyLc" placeholder="Ex: 1500">
+        <div class="input-wrapper">
+            <img src="./lucky_200x200.png" alt="Lucky Coin" onerror="this.style.display='none'">
+            <input type="number" id="qtyLc" class="has-icon" placeholder="Ex: 1500">
+        </div>
     </div>
 
     <div class="input-group">
         <label>Preço de 1 Lucky Coin no Mercado (em KKs)</label>
-        <input type="number" id="kkPricePerLc" placeholder="Ex: 0.05 (se for 50k)" step="0.0001">
+        <div class="input-wrapper">
+            <img src="./silver_200x200.png" alt="Silver KK" onerror="this.style.display='none'">
+            <input type="number" id="kkPricePerLc" class="has-icon" placeholder="Ex: 0.05 (se for 50k)" step="0.0001">
+        </div>
     </div>
 
     <div class="input-group">
         <label>Preço de 1 KK no Mercado Paralelo (R$)</label>
-        <input type="number" id="brlPricePerKk" placeholder="Ex: 5.50" step="0.01">
+        <div class="input-wrapper">
+            <img src="./silver_200x200.png" alt="Silver KK" onerror="this.style.display='none'">
+            <input type="number" id="brlPricePerKk" class="has-icon" placeholder="Ex: 5.50" step="0.01">
+        </div>
     </div>
 
     <button onclick="calcular()">Calcular Vantagem</button>
 
     <div id="result">
         <div class="result-item">
-            <strong>Custo Real (Cash):</strong> <span id="resCashCost"></span> / LC
+            <span>Custo Real (Cash):</span> 
+            <strong id="resCashCost"></strong>
         </div>
         <div class="result-item">
-            <strong>Custo via KK (Market):</strong> <span id="resKkCost"></span> / LC
+            <span>Custo via KK (Market):</span> 
+            <strong id="resKkCost"></strong>
         </div>
         <div id="verdictBox" class="verdict"></div>
         <div id="arbitrageBox" style="margin-top:10px; font-size: 0.9rem;"></div>
@@ -183,7 +217,7 @@
     </div>
 
     <div class="branding">
-        Ferramenta desenvolvida por <strong>GoTeahz</strong> &reg;<br>
+        Ferramenta desenvolvida por <strong>SEU NOME AQUI</strong> &reg;<br>
         &copy; 2025 Todos os direitos reservados.
     </div>
 </div>
@@ -207,8 +241,9 @@
         const resultDiv = document.getElementById('result');
         resultDiv.style.display = 'block';
 
-        document.getElementById('resCashCost').innerText = `R$ ${costLcViaCash.toFixed(3)}`;
-        document.getElementById('resKkCost').innerText = `R$ ${costLcViaKk.toFixed(3)}`;
+        // Formatação com ícone visual nos resultados (opcional)
+        document.getElementById('resCashCost').innerHTML = `R$ ${costLcViaCash.toFixed(3)} <small>/ LC</small>`;
+        document.getElementById('resKkCost').innerHTML = `R$ ${costLcViaKk.toFixed(3)} <small>/ LC</small>`;
 
         const verdictBox = document.getElementById('verdictBox');
         const arbBox = document.getElementById('arbitrageBox');
@@ -221,7 +256,7 @@
             
             if (impliedKkCostViaLc < brlPricePerKk) {
                 const profit = ((brlPricePerKk - impliedKkCostViaLc) / impliedKkCostViaLc) * 100;
-                arbMessage = `💡 <strong>Dica de KK:</strong> Vale a pena comprar Luck Coins com reais e vender no market para obter KKs. O custo do seu KK sairá por <strong>R$ ${impliedKkCostViaLc.toFixed(2)}</strong> (Economia de ${profit.toFixed(1)}%).`;
+                arbMessage = `💡 <strong>Dica de Farm:</strong> Compre LC com dinheiro real e venda no market. O seu KK sairá por apenas <strong>R$ ${impliedKkCostViaLc.toFixed(2)}</strong> (Economia de ${profit.toFixed(1)}%).`;
             } else {
                 arbMessage = "Para obter KKs, o preço direto do KK está equilibrado com a venda de Coins.";
             }
