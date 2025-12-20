@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Trade - Lucky Coin vs KK</title>
+    <style>
+        :root {
+            --bg-color: #1a1a2e;
+            --card-color: #16213e;
+            --accent-color: #0f3460;
+            --highlight: #e94560;
+            --text-color: #eaeaea;
+            --success: #4caf50;
+            --warning: #ff9800;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: var(--card-color);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 500px;
+            position: relative; /* Necessário para posicionamentos absolutos se usar */
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--highlight);
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            color: #b0b0b0;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid var(--accent-color);
+            background-color: #0f182b;
+            color: white;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--highlight);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--highlight);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.3s;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: #d1364e;
+        }
+
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: var(--accent-color);
+            border-radius: 8px;
+            display: none;
+        }
+
+        .result-item {
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .verdict {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .better-cash { background-color: rgba(76, 175, 80, 0.2); border: 1px solid var(--success); color: var(--success); }
+        .better-kk { background-color: rgba(255, 152, 0, 0.2); border: 1px solid var(--warning); color: var(--warning); }
+        
+        .small-note {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 10px;
+            text-align: center;
+            font-style: italic;
+        }
+
+        /* Estilo da Marca Registrada */
+        .branding {
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            font-size: 0.85rem;
+            color: #6a7b9c;
+            line-height: 1.4;
+        }
+
+        .branding strong {
+            color: var(--highlight);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Calculadora de Trade - Lucky Coin vs KK</h2>
+    
+    <div class="input-group">
+        <label>Preço do Pacote de Lucky Coins (R$)</label>
+        <input type="number" id="brlPkgPrice" placeholder="Ex: 250.00" step="0.01">
+    </div>
+
+    <div class="input-group">
+        <label>Quantidade de Lucky Coins no Pacote</label>
+        <input type="number" id="qtyLc" placeholder="Ex: 1500">
+    </div>
+
+    <div class="input-group">
+        <label>Preço de 1 Lucky Coin no Mercado (em KKs)</label>
+        <input type="number" id="kkPricePerLc" placeholder="Ex: 0.05 (se for 50k)" step="0.0001">
+    </div>
+
+    <div class="input-group">
+        <label>Preço de 1 KK no Mercado Paralelo (R$)</label>
+        <input type="number" id="brlPricePerKk" placeholder="Ex: 5.50" step="0.01">
+    </div>
+
+    <button onclick="calcular()">Calcular Vantagem</button>
+
+    <div id="result">
+        <div class="result-item">
+            <strong>Custo Real (Cash):</strong> <span id="resCashCost"></span> / LC
+        </div>
+        <div class="result-item">
+            <strong>Custo via KK (Market):</strong> <span id="resKkCost"></span> / LC
+        </div>
+        <div id="verdictBox" class="verdict"></div>
+        <div id="arbitrageBox" style="margin-top:10px; font-size: 0.9rem;"></div>
+    </div>
+    
+    <div class="small-note">
+        *Use ponto para casas decimais (ex: 5.50)
+    </div>
+
+    <div class="branding">
+        Ferramenta desenvolvida por <strong>GoTeahz</strong> &reg;<br>
+        &copy; 2025 Todos os direitos reservados.
+    </div>
+</div>
+
+<script>
+    function calcular() {
+        const brlPkgPrice = parseFloat(document.getElementById('brlPkgPrice').value);
+        const qtyLc = parseFloat(document.getElementById('qtyLc').value);
+        const kkPricePerLc = parseFloat(document.getElementById('kkPricePerLc').value);
+        const brlPricePerKk = parseFloat(document.getElementById('brlPricePerKk').value);
+
+        if (!brlPkgPrice || !qtyLc || !kkPricePerLc || !brlPricePerKk) {
+            alert("Por favor, preencha todos os campos corretamente.");
+            return;
+        }
+
+        const costLcViaCash = brlPkgPrice / qtyLc;
+        const costLcViaKk = kkPricePerLc * brlPricePerKk;
+        const impliedKkCostViaLc = brlPkgPrice / (qtyLc * kkPricePerLc);
+
+        const resultDiv = document.getElementById('result');
+        resultDiv.style.display = 'block';
+
+        document.getElementById('resCashCost').innerText = `R$ ${costLcViaCash.toFixed(3)}`;
+        document.getElementById('resKkCost').innerText = `R$ ${costLcViaKk.toFixed(3)}`;
+
+        const verdictBox = document.getElementById('verdictBox');
+        const arbBox = document.getElementById('arbitrageBox');
+        
+        let arbMessage = "";
+
+        if (costLcViaCash < costLcViaKk) {
+            verdictBox.className = "verdict better-cash";
+            verdictBox.innerHTML = "🏆 COMPRE O PACOTE EM R$<br><small>É mais barato comprar direto da loja.</small>";
+            
+            if (impliedKkCostViaLc < brlPricePerKk) {
+                const profit = ((brlPricePerKk - impliedKkCostViaLc) / impliedKkCostViaLc) * 100;
+                arbMessage = `💡 <strong>Dica de KK:</strong> Vale a pena comprar Luck Coins com reais e vender no market para obter KKs. O custo do seu KK sairá por <strong>R$ ${impliedKkCostViaLc.toFixed(2)}</strong> (Economia de ${profit.toFixed(1)}%).`;
+            } else {
+                arbMessage = "Para obter KKs, o preço direto do KK está equilibrado com a venda de Coins.";
+            }
+
+        } else {
+            verdictBox.className = "verdict better-kk";
+            verdictBox.innerHTML = "🏆 COMPRE KKs -> DEPOIS LUCK COINS<br><small>Sai mais barato comprar KK e trocar por LC no jogo.</small>";
+            
+            const economy = ((costLcViaCash - costLcViaKk) / costLcViaCash) * 100;
+            arbMessage = `Você economiza <strong>${economy.toFixed(1)}%</strong> fazendo a rota via KKs.`;
+        }
+
+        arbBox.innerHTML = arbMessage;
+    }
+</script>
+
+</body>
+</html>
