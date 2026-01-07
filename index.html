@@ -2,21 +2,16 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Calculadora Econômica - Lucky / Silver / Token</title>
+<title>Calculadora Econômica</title>
 
 <style>
 body {
     font-family: Arial, sans-serif;
     background: #111;
     color: #eee;
-    margin: 0;
     padding: 20px;
 }
-
-h1 {
-    text-align: center;
-}
-
+h1 { text-align: center; }
 .container {
     max-width: 1000px;
     margin: auto;
@@ -24,60 +19,39 @@ h1 {
     padding: 20px;
     border-radius: 8px;
 }
-
-label {
-    display: block;
-    margin-top: 10px;
-}
-
+label { display: block; margin-top: 10px; }
 input {
     width: 100%;
     padding: 8px;
-    margin-top: 4px;
     border-radius: 4px;
     border: none;
+    margin-top: 4px;
 }
-
 .tabs {
     display: flex;
-    margin-top: 20px;
     gap: 5px;
+    margin-top: 20px;
 }
-
 .tab {
     flex: 1;
+    background: #333;
     padding: 10px;
     cursor: pointer;
-    background: #333;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 8px;
 }
+.tab img { width: 28px; }
+.tab.active { background: #00b894; color: #000; }
+.content { display: none; margin-top: 20px; }
+.content.active { display: block; }
 
-.tab img {
-    width: 32px;
-    height: 32px;
-}
-
-.tab.active {
-    background: #00b894;
-    color: #000;
-}
-
-.content {
-    display: none;
-    margin-top: 20px;
-}
-
-.content.active {
-    display: block;
-}
-
-.result {
+.result, .panel {
     background: #2a2a2a;
     padding: 15px;
     border-radius: 6px;
+    margin-top: 15px;
 }
 
 .result-header {
@@ -85,18 +59,12 @@ input {
     align-items: center;
     gap: 15px;
 }
+.result-header img { width: 64px; }
 
-.result-header img {
-    width: 64px;
-    height: 64px;
-}
-
-.highlight {
-    color: #00ff9d;
-    font-weight: bold;
-    margin-top: 10px;
-    display: block;
-}
+.highlight { color: #00ff9d; font-weight: bold; }
+.bad { color: #ff7675; font-weight: bold; }
+.warn { color: #fdcb6e; font-weight: bold; }
+.na { opacity: 0.6; }
 </style>
 </head>
 
@@ -114,19 +82,18 @@ input {
 <label>Preço do pacote (R$)</label>
 <input id="precoPacote" type="number" step="0.01">
 
-<label>Preço de 1.000.000 de Silver em Reais</label>
+<label>Preço de 1.000.000 Silver (R$)</label>
 <input id="silverReal" type="number" step="0.01">
 
-<label>Preço da Lucky Coin em Silver (mercado)</label>
+<label>Preço da Lucky Coin em Silver</label>
 <input id="luckySilver" type="number">
 
-<label>Preço de 1.000.000 de Silver em Token$</label>
+<label>Preço de 1.000.000 Silver (Token$)</label>
 <input id="silverToken" type="number">
 
 <label>Preço do Token$ em Silver</label>
 <input id="tokenSilver" type="number">
 
-<!-- ABAS -->
 <div class="tabs">
     <div class="tab active" onclick="openTab(0)">
         <img src="lucky_200x200.png"> Lucky Coin
@@ -139,87 +106,121 @@ input {
     </div>
 </div>
 
-<div class="content active" id="tab0"></div>
-<div class="content" id="tab1"></div>
-<div class="content" id="tab2"></div>
+<!-- PAINEL GLOBAL -->
+<div id="globalPanel" class="panel"></div>
+
+<div id="tab0" class="content active"></div>
+<div id="tab1" class="content"></div>
+<div id="tab2" class="content"></div>
 
 </div>
 
 <script>
-function openTab(index) {
-    document.querySelectorAll('.tab').forEach((t,i)=>{
-        t.classList.toggle('active', i === index);
-    });
-    document.querySelectorAll('.content').forEach((c,i)=>{
-        c.classList.toggle('active', i === index);
-    });
+const els = {
+    luckyQtd: luckyQtd,
+    precoPacote: precoPacote,
+    silverReal: silverReal,
+    luckySilver: luckySilver,
+    silverToken: silverToken,
+    tokenSilver: tokenSilver
+};
+
+function v(n) { return isFinite(n) && n > 0 ? n : null; }
+function f(n, d=2) { return n === null ? '<span class="na">—</span>' : n.toFixed(d); }
+
+function openTab(i) {
+    document.querySelectorAll('.tab').forEach((t,idx)=>t.classList.toggle('active',idx===i));
+    document.querySelectorAll('.content').forEach((c,idx)=>c.classList.toggle('active',idx===i));
     calcular();
 }
 
 function calcular() {
-    const luckyQtd = +document.getElementById('luckyQtd').value;
-    const precoPacote = +document.getElementById('precoPacote').value;
-    const silverReal = +document.getElementById('silverReal').value;
-    const luckySilver = +document.getElementById('luckySilver').value;
-    const silverToken = +document.getElementById('silverToken').value;
-    const tokenSilver = +document.getElementById('tokenSilver').value;
+    const luckyQtd = v(+els.luckyQtd.value);
+    const precoPacote = v(+els.precoPacote.value);
+    const silverReal = v(+els.silverReal.value);
+    const luckySilver = v(+els.luckySilver.value);
+    const silverToken = v(+els.silverToken.value);
+    const tokenSilver = v(+els.tokenSilver.value);
 
-    if (!luckyQtd || !precoPacote || !silverReal || !luckySilver || !tokenSilver) return;
+    const precoLuckyReal = luckyQtd && precoPacote ? precoPacote / luckyQtd : null;
+    const realPorSilver = silverReal ? silverReal / 1_000_000 : null;
+    const silverPorReal = silverReal ? 1_000_000 / silverReal : null;
+    const tokenReal = tokenSilver && realPorSilver ? tokenSilver * realPorSilver : null;
 
-    const precoLuckyReal = precoPacote / luckyQtd;
-    const realPorSilver = silverReal / 1_000_000;
-    const silverPorReal = 1_000_000 / silverReal;
-    const tokenReal = tokenSilver * realPorSilver;
+    /* ================= RANKING ================= */
+    const ranking = [];
 
-    // Lucky Coin
+    if (precoLuckyReal) ranking.push({nome:'Lucky Coin', valor:precoLuckyReal});
+    if (silverReal) ranking.push({nome:'Silver', valor:silverReal});
+    if (tokenReal) ranking.push({nome:'Token$', valor:tokenReal});
+
+    ranking.sort((a,b)=>a.valor-b.valor);
+
+    /* ================= MARGENS ================= */
+    const margemLuckySilver = precoLuckyReal && silverPorReal
+        ? precoLuckyReal * silverPorReal
+        : null;
+
+    const alertaLucky = luckySilver && margemLuckySilver && luckySilver < margemLuckySilver;
+
+    /* ================= PAINEL GLOBAL ================= */
+    document.getElementById('globalPanel').innerHTML = `
+        <h3>🏆 Mais barato comprar com</h3>
+        ${ranking.length
+            ? `<span class="highlight">${ranking[0].nome}</span>`
+            : '<span class="na">Dados insuficientes</span>'}
+
+        <h3 style="margin-top:15px;">📉 Margem mínima (Lucky Coin)</h3>
+        ${margemLuckySilver
+            ? `${Math.ceil(margemLuckySilver).toLocaleString()} Silver`
+            : '<span class="na">—</span>'}
+
+        <h3 style="margin-top:15px;">⚠️ Alertas</h3>
+        ${alertaLucky
+            ? '<span class="bad">Lucky Coin está sendo vendida abaixo do custo!</span>'
+            : '<span class="highlight">Nenhum alerta crítico</span>'}
+    `;
+
+    /* ================= ABAS ================= */
     document.getElementById('tab0').innerHTML = `
         <div class="result">
             <div class="result-header">
                 <img src="lucky_200x200.png">
-                <h3>Preço Médio da Lucky Coin</h3>
+                <h3>Lucky Coin</h3>
             </div>
-            R$: ${precoLuckyReal.toFixed(2)}<br>
-            Silver: ${luckySilver.toLocaleString()}<br>
-            Token$: ${(luckySilver / tokenSilver).toFixed(2)}
-            <span class="highlight">
-                Valor mínimo de venda (Silver): ${Math.ceil(precoLuckyReal * silverPorReal).toLocaleString()}
-            </span>
+            R$: ${f(precoLuckyReal)}<br>
+            Silver: ${f(luckySilver,0)}<br>
+            Token$: ${tokenSilver && luckySilver ? f(luckySilver/tokenSilver) : '<span class="na">—</span>'}
         </div>
     `;
 
-    // Silver
     document.getElementById('tab1').innerHTML = `
         <div class="result">
             <div class="result-header">
                 <img src="silver_200x200.png">
-                <h3>Preço Médio de 1.000.000 Silver</h3>
+                <h3>1.000.000 Silver</h3>
             </div>
-            R$: ${silverReal.toFixed(2)}<br>
-            Lucky Coin: ${(1_000_000 / luckySilver).toFixed(2)}<br>
-            Token$: ${silverToken}
-            <span class="highlight">
-                Valor mínimo de venda em R$: ${silverReal.toFixed(2)}
-            </span>
+            R$: ${f(silverReal)}<br>
+            Lucky Coin: ${luckySilver ? f(1_000_000/luckySilver) : '<span class="na">—</span>'}<br>
+            Token$: ${f(silverToken)}
         </div>
     `;
 
-    // Token
     document.getElementById('tab2').innerHTML = `
         <div class="result">
             <div class="result-header">
                 <img src="token_200x200.png">
-                <h3>Preço Médio do Token$</h3>
+                <h3>Token$</h3>
             </div>
-            R$: ${tokenReal.toFixed(2)}<br>
-            Silver: ${tokenSilver.toLocaleString()}<br>
-            Lucky Coin: ${(tokenSilver / luckySilver).toFixed(2)}
+            R$: ${f(tokenReal)}<br>
+            Silver: ${f(tokenSilver,0)}<br>
+            Lucky Coin: ${tokenSilver && luckySilver ? f(tokenSilver/luckySilver) : '<span class="na">—</span>'}
         </div>
     `;
 }
 
-document.querySelectorAll('input').forEach(input => {
-    input.addEventListener('input', calcular);
-});
+document.querySelectorAll('input').forEach(i => i.addEventListener('input', calcular));
+calcular();
 </script>
 
 </body>
