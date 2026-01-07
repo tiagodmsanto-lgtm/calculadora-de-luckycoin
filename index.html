@@ -1,276 +1,208 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora RavenQuest - Lucky Coin vs KK</title>
-    <style>
-        :root {
-            --bg-color: #1a1a2e;
-            --card-color: #16213e;
-            --accent-color: #0f3460;
-            --highlight: #e94560;
-            --text-color: #eaeaea;
-            --success: #4caf50;
-            --warning: #ff9800;
-        }
+<meta charset="UTF-8">
+<title>Calculadora Econômica Completa</title>
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
+<style>
+body{
+    background:#1a1a2e;
+    font-family:Segoe UI, sans-serif;
+    color:#eaeaea;
+    display:flex;
+    justify-content:center;
+    padding:30px;
+}
 
-        .container {
-            background-color: var(--card-color);
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
-            width: 100%;
-            max-width: 500px;
-        }
+.container{
+    background:#16213e;
+    padding:25px;
+    border-radius:12px;
+    width:100%;
+    max-width:700px;
+}
 
-        h2 {
-            text-align: center;
-            color: var(--highlight);
-            margin-bottom: 1.5rem;
-        }
+h2{
+    text-align:center;
+    color:#e94560;
+}
 
-        .input-group {
-            margin-bottom: 15px;
-        }
+.tabs{
+    display:flex;
+    margin:20px 0;
+}
 
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 0.9rem;
-            color: #b0b0b0;
-        }
+.tab{
+    flex:1;
+    padding:10px;
+    cursor:pointer;
+    text-align:center;
+    background:#0f3460;
+    border:1px solid #1a1a2e;
+}
 
-        /* Wrapper para colocar o ícone junto com o input */
-        .input-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
+.tab.active{
+    background:#e94560;
+    font-weight:bold;
+}
 
-        .input-wrapper img {
-            position: absolute;
-            left: 12px;
-            width: 24px;
-            height: 24px;
-            object-fit: contain;
-            pointer-events: none; /* O clique passa através da imagem */
-        }
+.input-group{
+    margin-bottom:12px;
+}
 
-        input {
-            width: 100%;
-            padding: 10px;
-            /* Adiciona espaço na esquerda se tiver ícone, senão padrão */
-            padding-left: 12px; 
-            border: 2px solid var(--accent-color);
-            background-color: #0f182b;
-            color: white;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 1rem;
-            transition: 0.3s;
-        }
+label{
+    font-size:0.9rem;
+    color:#bbb;
+}
 
-        /* Classe específica para inputs que têm ícone */
-        input.has-icon {
-            padding-left: 45px; /* Espaço para o ícone */
-        }
+input{
+    width:100%;
+    padding:8px;
+    border-radius:6px;
+    border:2px solid #0f3460;
+    background:#0f182b;
+    color:#fff;
+}
 
-        input:focus {
-            outline: none;
-            border-color: var(--highlight);
-        }
+button{
+    margin-top:15px;
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:6px;
+    background:#e94560;
+    color:white;
+    font-size:1.05rem;
+    cursor:pointer;
+}
 
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: var(--highlight);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: 0.3s;
-            font-weight: bold;
-        }
+.result{
+    margin-top:20px;
+    background:#0f3460;
+    padding:15px;
+    border-radius:8px;
+}
 
-        button:hover {
-            background-color: #d1364e;
-        }
+.result p{
+    margin:6px 0;
+}
 
-        #result {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: var(--accent-color);
-            border-radius: 8px;
-            display: none;
-        }
+.highlight{
+    color:#4caf50;
+    font-weight:bold;
+}
 
-        .result-item {
-            margin-bottom: 10px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .verdict {
-            font-weight: bold;
-            font-size: 1.1rem;
-            margin-top: 15px;
-            padding: 10px;
-            border-radius: 6px;
-            text-align: center;
-        }
-
-        .better-cash { background-color: rgba(76, 175, 80, 0.2); border: 1px solid var(--success); color: var(--success); }
-        .better-kk { background-color: rgba(255, 152, 0, 0.2); border: 1px solid var(--warning); color: var(--warning); }
-        
-        .small-note {
-            font-size: 0.8rem;
-            color: #888;
-            margin-top: 10px;
-            text-align: center;
-            font-style: italic;
-        }
-
-        .branding {
-            margin-top: 25px;
-            padding-top: 15px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            text-align: center;
-            font-size: 0.85rem;
-            color: #6a7b9c;
-            line-height: 1.4;
-        }
-
-        .branding strong {
-            color: var(--highlight);
-            font-weight: 700;
-        }
-    </style>
+.warning{
+    color:#ff9800;
+    font-weight:bold;
+}
+</style>
 </head>
+
 <body>
 
 <div class="container">
-    <h2>Calculadora de Economia</h2>
-    
-    <div class="input-group">
-        <label>Preço do Pacote de Lucky Coins (R$)</label>
-        <input type="number" id="brlPkgPrice" placeholder="Ex: 250.00" step="0.01">
-    </div>
+<h2>Calculadora Econômica RavenQuest</h2>
 
-    <div class="input-group">
-        <label>Quantidade de Lucky Coins no Pacote</label>
-        <div class="input-wrapper">
-            <img src="./lucky_200x200.png" alt="Lucky Coin" onerror="this.style.display='none'">
-            <input type="number" id="qtyLc" class="has-icon" placeholder="Ex: 1500">
-        </div>
-    </div>
+<!-- INPUTS -->
+<div class="input-group">
+<label>Preço do pacote (R$)</label>
+<input id="pkgPrice" type="number" step="0.01">
+</div>
 
-    <div class="input-group">
-        <label>Preço de 1 Lucky Coin no Mercado (em KKs)</label>
-        <div class="input-wrapper">
-            <img src="./silver_200x200.png" alt="Silver KK" onerror="this.style.display='none'">
-            <input type="number" id="kkPricePerLc" class="has-icon" placeholder="Ex: 0.05 (se for 50k)" step="0.0001">
-        </div>
-    </div>
+<div class="input-group">
+<label>Quantidade de Lucky Coins no pacote</label>
+<input id="qtyLc" type="number">
+</div>
 
-    <div class="input-group">
-        <label>Preço de 1 KK no Mercado Paralelo (R$)</label>
-        <div class="input-wrapper">
-            <img src="./silver_200x200.png" alt="Silver KK" onerror="this.style.display='none'">
-            <input type="number" id="brlPricePerKk" class="has-icon" placeholder="Ex: 5.50" step="0.01">
-        </div>
-    </div>
+<div class="input-group">
+<label>Preço de 1.000.000 Silver (R$)</label>
+<input id="silverBrl" type="number" step="0.01">
+</div>
 
-    <button onclick="calcular()">Calcular Vantagem</button>
+<div class="input-group">
+<label>Preço da Lucky Coin em Silver</label>
+<input id="lcSilver" type="number">
+</div>
 
-    <div id="result">
-        <div class="result-item">
-            <span>Custo Real (Cash):</span> 
-            <strong id="resCashCost"></strong>
-        </div>
-        <div class="result-item">
-            <span>Custo via KK (Market):</span> 
-            <strong id="resKkCost"></strong>
-        </div>
-        <div id="verdictBox" class="verdict"></div>
-        <div id="arbitrageBox" style="margin-top:10px; font-size: 0.9rem;"></div>
-    </div>
-    
-    <div class="small-note">
-        *Use ponto para casas decimais (ex: 5.50)
-    </div>
+<div class="input-group">
+<label>Preço de 1.000.000 Silver em Token$</label>
+<input id="silverToken" type="number">
+</div>
 
-    <div class="branding">
-        Ferramenta desenvolvida por <strong>SEU NOME AQUI</strong> &reg;<br>
-        &copy; 2025 Todos os direitos reservados.
-    </div>
+<div class="input-group">
+<label>Preço do Token$ em Silver</label>
+<input id="tokenSilver" type="number">
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+<div class="tab active" onclick="setTab('lc')">Lucky Coin</div>
+<div class="tab" onclick="setTab('silver')">Silver</div>
+<div class="tab" onclick="setTab('token')">Token$</div>
+</div>
+
+<button onclick="calcular()">Calcular</button>
+
+<div class="result" id="result" style="display:none"></div>
 </div>
 
 <script>
-    function calcular() {
-        const brlPkgPrice = parseFloat(document.getElementById('brlPkgPrice').value);
-        const qtyLc = parseFloat(document.getElementById('qtyLc').value);
-        const kkPricePerLc = parseFloat(document.getElementById('kkPricePerLc').value);
-        const brlPricePerKk = parseFloat(document.getElementById('brlPricePerKk').value);
+let currentTab = "lc";
 
-        if (!brlPkgPrice || !qtyLc || !kkPricePerLc || !brlPricePerKk) {
-            alert("Por favor, preencha todos os campos corretamente.");
-            return;
-        }
+function setTab(tab){
+    currentTab = tab;
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    event.target.classList.add('active');
+}
 
-        const costLcViaCash = brlPkgPrice / qtyLc;
-        const costLcViaKk = kkPricePerLc * brlPricePerKk;
-        const impliedKkCostViaLc = brlPkgPrice / (qtyLc * kkPricePerLc);
+function calcular(){
+    const pkg = +pkgPrice.value;
+    const qty = +qtyLc.value;
+    const silverBrlVal = +silverBrl.value;
+    const lcSilverVal = +lcSilver.value;
+    const silverTokenVal = +silverToken.value;
+    const tokenSilverVal = +tokenSilver.value;
 
-        const resultDiv = document.getElementById('result');
-        resultDiv.style.display = 'block';
-
-        // Formatação com ícone visual nos resultados (opcional)
-        document.getElementById('resCashCost').innerHTML = `R$ ${costLcViaCash.toFixed(3)} <small>/ LC</small>`;
-        document.getElementById('resKkCost').innerHTML = `R$ ${costLcViaKk.toFixed(3)} <small>/ LC</small>`;
-
-        const verdictBox = document.getElementById('verdictBox');
-        const arbBox = document.getElementById('arbitrageBox');
-        
-        let arbMessage = "";
-
-        if (costLcViaCash < costLcViaKk) {
-            verdictBox.className = "verdict better-cash";
-            verdictBox.innerHTML = "🏆 COMPRE O PACOTE EM R$<br><small>É mais barato comprar direto da loja.</small>";
-            
-            if (impliedKkCostViaLc < brlPricePerKk) {
-                const profit = ((brlPricePerKk - impliedKkCostViaLc) / impliedKkCostViaLc) * 100;
-                arbMessage = `💡 <strong>Dica de Farm:</strong> Compre LC com dinheiro real e venda no market. O seu KK sairá por apenas <strong>R$ ${impliedKkCostViaLc.toFixed(2)}</strong> (Economia de ${profit.toFixed(1)}%).`;
-            } else {
-                arbMessage = "Para obter KKs, o preço direto do KK está equilibrado com a venda de Coins.";
-            }
-
-        } else {
-            verdictBox.className = "verdict better-kk";
-            verdictBox.innerHTML = "🏆 COMPRE KKs -> DEPOIS LUCK COINS<br><small>Sai mais barato comprar KK e trocar por LC no jogo.</small>";
-            
-            const economy = ((costLcViaCash - costLcViaKk) / costLcViaCash) * 100;
-            arbMessage = `Você economiza <strong>${economy.toFixed(1)}%</strong> fazendo a rota via KKs.`;
-        }
-
-        arbBox.innerHTML = arbMessage;
+    if(!pkg||!qty||!silverBrlVal||!lcSilverVal||!silverTokenVal||!tokenSilverVal){
+        alert("Preencha todos os campos.");
+        return;
     }
+
+    const lcBrl = pkg / qty;
+    const silverUnitBrl = silverBrlVal / 1_000_000;
+    const tokenBrl = (tokenSilverVal * silverUnitBrl);
+
+    let html = "";
+
+    if(currentTab==="lc"){
+        html += `<p>💰 Lucky Coin em R$: <b>${lcBrl.toFixed(4)}</b></p>`;
+        html += `<p>🪙 Lucky Coin em Silver: <b>${lcSilverVal.toLocaleString()}</b></p>`;
+        html += `<p>💠 Lucky Coin em Token$: <b>${(lcSilverVal/tokenSilverVal).toFixed(2)}</b></p>`;
+    }
+
+    if(currentTab==="silver"){
+        html += `<p>🪙 1M Silver em R$: <b>${silverBrlVal.toFixed(2)}</b></p>`;
+        html += `<p>💰 1M Silver em Lucky Coins: <b>${(1_000_000/lcSilverVal).toFixed(2)}</b></p>`;
+        html += `<p>💠 1M Silver em Token$: <b>${silverTokenVal.toFixed(2)}</b></p>`;
+    }
+
+    if(currentTab==="token"){
+        html += `<p>💠 Token$ em R$: <b>${tokenBrl.toFixed(4)}</b></p>`;
+        html += `<p>🪙 Token$ em Silver: <b>${tokenSilverVal.toLocaleString()}</b></p>`;
+        html += `<p>💰 Token$ em Lucky Coins: <b>${(tokenSilverVal/lcSilverVal).toFixed(2)}</b></p>`;
+    }
+
+    const cheapest = Math.min(lcBrl, silverUnitBrl*lcSilverVal, tokenBrl*(lcSilverVal/tokenSilverVal));
+
+    html += `<hr>`;
+    html += `<p class="highlight">✅ Forma mais barata de compra detectada automaticamente</p>`;
+    html += `<p>📉 Valor mínimo Lucky Coin (Silver): <b>${lcBrl/silverUnitBrl}</b></p>`;
+    html += `<p>📉 Valor mínimo Silver (R$ por 1M): <b>${silverBrlVal.toFixed(2)}</b></p>`;
+
+    result.innerHTML = html;
+    result.style.display="block";
+}
 </script>
 
 </body>
