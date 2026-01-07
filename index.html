@@ -13,7 +13,7 @@ body {
 }
 h1 { text-align: center; }
 .container {
-    max-width: 1000px;
+    max-width: 1100px;
     margin: auto;
     background: #1c1c1c;
     padding: 20px;
@@ -47,7 +47,7 @@ input {
 .content { display: none; margin-top: 20px; }
 .content.active { display: block; }
 
-.result, .panel {
+.panel, .result {
     background: #2a2a2a;
     padding: 15px;
     border-radius: 6px;
@@ -63,7 +63,6 @@ input {
 
 .highlight { color: #00ff9d; font-weight: bold; }
 .bad { color: #ff7675; font-weight: bold; }
-.warn { color: #fdcb6e; font-weight: bold; }
 .na { opacity: 0.6; }
 </style>
 </head>
@@ -94,6 +93,9 @@ input {
 <label>Preço do Token$ em Silver</label>
 <input id="tokenSilver" type="number">
 
+<label>📈 Lucro desejado (%)</label>
+<input id="lucroPct" type="number" step="0.1">
+
 <div class="tabs">
     <div class="tab active" onclick="openTab(0)">
         <img src="lucky_200x200.png"> Lucky Coin
@@ -106,7 +108,6 @@ input {
     </div>
 </div>
 
-<!-- PAINEL GLOBAL -->
 <div id="globalPanel" class="panel"></div>
 
 <div id="tab0" class="content active"></div>
@@ -116,83 +117,58 @@ input {
 </div>
 
 <script>
-const els = {
-    luckyQtd: luckyQtd,
-    precoPacote: precoPacote,
-    silverReal: silverReal,
-    luckySilver: luckySilver,
-    silverToken: silverToken,
-    tokenSilver: tokenSilver
-};
+function v(n){ return isFinite(n) && n>0 ? n : null }
+function f(n,d=2){ return n===null ? '<span class="na">—</span>' : n.toFixed(d) }
 
-function v(n) { return isFinite(n) && n > 0 ? n : null; }
-function f(n, d=2) { return n === null ? '<span class="na">—</span>' : n.toFixed(d); }
-
-function openTab(i) {
-    document.querySelectorAll('.tab').forEach((t,idx)=>t.classList.toggle('active',idx===i));
-    document.querySelectorAll('.content').forEach((c,idx)=>c.classList.toggle('active',idx===i));
-    calcular();
+function openTab(i){
+    document.querySelectorAll('.tab').forEach((t,x)=>t.classList.toggle('active',x===i))
+    document.querySelectorAll('.content').forEach((c,x)=>c.classList.toggle('active',x===i))
+    calcular()
 }
 
-function calcular() {
-    const luckyQtd = v(+els.luckyQtd.value);
-    const precoPacote = v(+els.precoPacote.value);
-    const silverReal = v(+els.silverReal.value);
-    const luckySilver = v(+els.luckySilver.value);
-    const silverToken = v(+els.silverToken.value);
-    const tokenSilver = v(+els.tokenSilver.value);
+function calcular(){
+    const luckyQtd = v(+luckyQtdEl.value)
+    const precoPacote = v(+precoPacoteEl.value)
+    const silverReal = v(+silverRealEl.value)
+    const luckySilver = v(+luckySilverEl.value)
+    const silverToken = v(+silverTokenEl.value)
+    const tokenSilver = v(+tokenSilverEl.value)
+    const lucroPct = v(+lucroPctEl.value)
 
-    const precoLuckyReal = luckyQtd && precoPacote ? precoPacote / luckyQtd : null;
-    const realPorSilver = silverReal ? silverReal / 1_000_000 : null;
-    const silverPorReal = silverReal ? 1_000_000 / silverReal : null;
-    const tokenReal = tokenSilver && realPorSilver ? tokenSilver * realPorSilver : null;
+    const precoLuckyReal = luckyQtd && precoPacote ? precoPacote/luckyQtd : null
+    const realPorSilver = silverReal ? silverReal/1_000_000 : null
+    const silverPorReal = silverReal ? 1_000_000/silverReal : null
 
-    /* ================= RANKING ================= */
-    const ranking = [];
+    const vendaSilverReal = silverReal && lucroPct
+        ? silverReal * (1 + lucroPct/100)
+        : null
 
-    if (precoLuckyReal) ranking.push({nome:'Lucky Coin', valor:precoLuckyReal});
-    if (silverReal) ranking.push({nome:'Silver', valor:silverReal});
-    if (tokenReal) ranking.push({nome:'Token$', valor:tokenReal});
+    const vendaLuckySilver = luckySilver && lucroPct
+        ? luckySilver * (1 + lucroPct/100)
+        : null
 
-    ranking.sort((a,b)=>a.valor-b.valor);
-
-    /* ================= MARGENS ================= */
-    const margemLuckySilver = precoLuckyReal && silverPorReal
-        ? precoLuckyReal * silverPorReal
-        : null;
-
-    const alertaLucky = luckySilver && margemLuckySilver && luckySilver < margemLuckySilver;
-
-    /* ================= PAINEL GLOBAL ================= */
     document.getElementById('globalPanel').innerHTML = `
-        <h3>🏆 Mais barato comprar com</h3>
-        ${ranking.length
-            ? `<span class="highlight">${ranking[0].nome}</span>`
-            : '<span class="na">Dados insuficientes</span>'}
+        <h3>📈 Preço mínimo de venda com lucro</h3>
 
-        <h3 style="margin-top:15px;">📉 Margem mínima (Lucky Coin)</h3>
-        ${margemLuckySilver
-            ? `${Math.ceil(margemLuckySilver).toLocaleString()} Silver`
-            : '<span class="na">—</span>'}
+        <b>Silver (1.000.000):</b><br>
+        ${vendaSilverReal ? `<span class="highlight">R$ ${vendaSilverReal.toFixed(2)}</span>` : '<span class="na">—</span>'}
 
-        <h3 style="margin-top:15px;">⚠️ Alertas</h3>
-        ${alertaLucky
-            ? '<span class="bad">Lucky Coin está sendo vendida abaixo do custo!</span>'
-            : '<span class="highlight">Nenhum alerta crítico</span>'}
-    `;
+        <br><br>
 
-    /* ================= ABAS ================= */
+        <b>Lucky Coin:</b><br>
+        ${vendaLuckySilver ? `<span class="highlight">${Math.ceil(vendaLuckySilver).toLocaleString()} Silver</span>` : '<span class="na">—</span>'}
+    `
+
     document.getElementById('tab0').innerHTML = `
         <div class="result">
             <div class="result-header">
                 <img src="lucky_200x200.png">
                 <h3>Lucky Coin</h3>
             </div>
-            R$: ${f(precoLuckyReal)}<br>
-            Silver: ${f(luckySilver,0)}<br>
-            Token$: ${tokenSilver && luckySilver ? f(luckySilver/tokenSilver) : '<span class="na">—</span>'}
+            Custo atual: ${f(luckySilver,0)} Silver<br>
+            Venda com lucro: ${vendaLuckySilver ? `<span class="highlight">${Math.ceil(vendaLuckySilver).toLocaleString()}</span>` : '<span class="na">—</span>'}
         </div>
-    `;
+    `
 
     document.getElementById('tab1').innerHTML = `
         <div class="result">
@@ -200,11 +176,10 @@ function calcular() {
                 <img src="silver_200x200.png">
                 <h3>1.000.000 Silver</h3>
             </div>
-            R$: ${f(silverReal)}<br>
-            Lucky Coin: ${luckySilver ? f(1_000_000/luckySilver) : '<span class="na">—</span>'}<br>
-            Token$: ${f(silverToken)}
+            Custo atual: R$ ${f(silverReal)}<br>
+            Venda com lucro: ${vendaSilverReal ? `<span class="highlight">R$ ${vendaSilverReal.toFixed(2)}</span>` : '<span class="na">—</span>'}
         </div>
-    `;
+    `
 
     document.getElementById('tab2').innerHTML = `
         <div class="result">
@@ -212,15 +187,21 @@ function calcular() {
                 <img src="token_200x200.png">
                 <h3>Token$</h3>
             </div>
-            R$: ${f(tokenReal)}<br>
-            Silver: ${f(tokenSilver,0)}<br>
-            Lucky Coin: ${tokenSilver && luckySilver ? f(tokenSilver/luckySilver) : '<span class="na">—</span>'}
+            Utilize como intermediário de conversão
         </div>
-    `;
+    `
 }
 
-document.querySelectorAll('input').forEach(i => i.addEventListener('input', calcular));
-calcular();
+const luckyQtdEl = luckyQtd
+const precoPacoteEl = precoPacote
+const silverRealEl = silverReal
+const luckySilverEl = luckySilver
+const silverTokenEl = silverToken
+const tokenSilverEl = tokenSilver
+const lucroPctEl = lucroPct
+
+document.querySelectorAll('input').forEach(i=>i.addEventListener('input',calcular))
+calcular()
 </script>
 
 </body>
