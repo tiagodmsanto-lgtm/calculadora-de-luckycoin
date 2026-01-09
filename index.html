@@ -79,14 +79,14 @@ small{color:#64748b}
     <button onclick="openTab(3)">Venda Silver</button>
 </div>
 
-<!-- ABA 0 — COTAÇÃO -->
+<!-- ABA 0 -->
 <div class="section active">
 <h2>Cotação Token / Silver (Automática)</h2>
 
-<label>USD → BRL (configurável)</label>
+<label>USD → BRL</label>
 <input id="usdBrl" type="number" value="5.10" step="0.01">
 
-<label>1 Token equivale a quantos Silver (jogo)</label>
+<label>1 Token equivale a quantos Silver</label>
 <input id="tokenSilver" type="number" value="1000000">
 
 <div class="result" id="resCotacao">Carregando cotação...</div>
@@ -132,7 +132,6 @@ small{color:#64748b}
 <!-- ABA 3 -->
 <div class="section">
 <h2>Venda de Silver</h2>
-<p><small>Conversão automática usando a cotação atual</small></p>
 
 <button class="calc" onclick="vendaSilver()">Calcular</button>
 <div class="result" id="resSilver"></div>
@@ -152,7 +151,7 @@ function openTab(i){
     });
 }
 
-// Cotação automática (GeckoTerminal)
+// Cotação
 async function carregarCotacao(){
     try{
         const res = await fetch(
@@ -160,22 +159,15 @@ async function carregarCotacao(){
         );
         const json = await res.json();
 
-        const tokenUSD = Number(
-            json.data.attributes.base_token_price_usd
-        );
+        const tokenUSD = Number(json.data.attributes.base_token_price_usd);
+        if(!tokenUSD) throw "";
 
-        if(!tokenUSD || isNaN(tokenUSD)) throw "Preço inválido";
-
-        const usdBrl = Number(usdBrlInput.value);
-        const tokenBRL = tokenUSD * usdBrl;
-        const tokenSilver = Number(tokenSilverInput.value);
-
-        valorSilverBRL = tokenBRL / tokenSilver;
+        const tokenBRL = tokenUSD * Number(usdBrl.value);
+        valorSilverBRL = tokenBRL / Number(tokenSilver.value);
 
         resCotacao.innerHTML = `
-        Token (USD): <b>$ ${tokenUSD.toFixed(6)}</b><br>
-        Token (BRL): <b>R$ ${tokenBRL.toFixed(6)}</b><br><br>
-        1 Silver = <b>R$ ${valorSilverBRL.toFixed(8)}</b><br>
+        Token USD: <b>$ ${tokenUSD.toFixed(6)}</b><br>
+        Token BRL: <b>R$ ${tokenBRL.toFixed(6)}</b><br><br>
         1.000.000 Silver = <b>R$ ${(valorSilverBRL*1_000_000).toFixed(2)}</b>
         `;
     }catch{
@@ -183,7 +175,7 @@ async function carregarCotacao(){
     }
 }
 
-// ABA 1
+// ABA 1 (ALTERAÇÃO AQUI)
 function compararLucky(){
     const luckyGame = Number(luckySilverGame.value);
     const pacote = Number(pacoteBRL1.value);
@@ -194,12 +186,11 @@ function compararLucky(){
     const custoLuckySilver = custoLuckyBRL / valorSilverBRL;
     const precoVenda = custoLuckySilver * (1+lucro);
 
-    const melhor =
-        custoLuckySilver < luckyGame ? "BRL" : "Silver";
+    const melhor = custoLuckySilver < luckyGame ? "BRL" : "Silver";
 
     resComparar.innerHTML = `
     Lucky via Silver: <b>${luckyGame.toFixed(0)} Silver</b><br>
-    Lucky via BRL: <b>${custoLuckySilver.toFixed(0)} Silver</b><br>
+    Lucky via BRL: <b>R$ ${custoLuckyBRL.toFixed(2)} BRL</b><br>
     Mais barata: <b>${melhor}</b><br><br>
     Venda ideal: <b>${precoVenda.toFixed(0)} Silver</b>
     `;
@@ -211,30 +202,24 @@ function vendaLucky(){
     const qtd = Number(qtdLucky2.value);
     const lucro = Number(lucro2.value)/100;
 
-    const custoLuckySilver = (pacote/qtd)/valorSilverBRL;
-    const precoVenda = custoLuckySilver*(1+lucro);
+    const custoSilver = (pacote/qtd)/valorSilverBRL;
+    const venda = custoSilver*(1+lucro);
 
     resVenda.innerHTML = `
-    Custo: <b>${custoLuckySilver.toFixed(0)} Silver</b><br>
-    Venda ideal: <b>${precoVenda.toFixed(0)} Silver</b>
+    Custo: <b>${custoSilver.toFixed(0)} Silver</b><br>
+    Venda ideal: <b>${venda.toFixed(0)} Silver</b>
     `;
 }
 
 // ABA 3
 function vendaSilver(){
     resSilver.innerHTML = `
-    1.000.000 Silver = 
-    <b>R$ ${(valorSilverBRL*1_000_000).toFixed(2)}</b>
+    1.000.000 Silver = <b>R$ ${(valorSilverBRL*1_000_000).toFixed(2)}</b>
     `;
 }
 
-// aliases
-const usdBrlInput = document.getElementById("usdBrl");
-const tokenSilverInput = document.getElementById("tokenSilver");
-
-// init
-usdBrlInput.onchange = carregarCotacao;
-tokenSilverInput.onchange = carregarCotacao;
+usdBrl.onchange = carregarCotacao;
+tokenSilver.onchange = carregarCotacao;
 carregarCotacao();
 </script>
 
