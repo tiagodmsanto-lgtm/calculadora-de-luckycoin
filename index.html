@@ -130,6 +130,7 @@ button.calc{
 <script>
 // ================= CONFIGURAÇÕES =================
 const TOKEN_ADDRESS = "0xbe2930d274f862542740dcdc95257b3163172343";
+const NETWORK = "immutable-zkevm";
 const USD_BRL = 5.10; // taxa fixa configurável
 
 // ================= ESTADO GLOBAL =================
@@ -145,20 +146,22 @@ function openTab(i){
     });
 }
 
-// ================= ABA 3 — COTAÇÃO BASE =================
+// ================= ABA 3 — COTAÇÃO =================
 async function carregarCotacao(){
     try{
         const res = await fetch(
-            `https://api.geckoterminal.com/api/v2/tokens/${TOKEN_ADDRESS}`
+            `https://api.geckoterminal.com/api/v2/networks/${NETWORK}/tokens/${TOKEN_ADDRESS}`
         );
+
+        if(!res.ok) throw new Error("Falha na API");
+
         const json = await res.json();
 
         const tokenUSD = Number(json.data.attributes.price_usd);
-        const tokenBRL = tokenUSD * USD_BRL;
+        if(!tokenUSD || tokenUSD <= 0) throw new Error("Preço inválido");
 
-        const tokenSilver = Number(
-            document.getElementById("tokenSilver").value
-        );
+        const tokenBRL = tokenUSD * USD_BRL;
+        const tokenSilver = Number(document.getElementById("tokenSilver").value);
 
         valorSilverBRL = tokenBRL / tokenSilver;
 
@@ -170,7 +173,8 @@ async function carregarCotacao(){
         `;
     }catch(e){
         document.getElementById("resCotacao").innerHTML =
-            "Erro ao carregar cotação do token.";
+            "<span class='warn'>❌ Erro ao validar o preço do token</span>";
+        valorSilverBRL = 0;
     }
 }
 
@@ -178,7 +182,7 @@ async function carregarCotacao(){
 function compararLucky(){
     if(valorSilverBRL <= 0){
         resComparar.innerHTML =
-            "<span class='warn'>⚠️ Aguarde a cotação do token.</span>";
+            "<span class='warn'>⚠️ Cotação do token inválida</span>";
         return;
     }
 
@@ -209,7 +213,7 @@ function compararLucky(){
 function vendaLucky(){
     if(valorSilverBRL <= 0){
         resVenda.innerHTML =
-            "<span class='warn'>⚠️ Aguarde a cotação do token.</span>";
+            "<span class='warn'>⚠️ Cotação do token inválida</span>";
         return;
     }
 
