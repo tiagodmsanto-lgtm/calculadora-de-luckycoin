@@ -93,11 +93,6 @@ button{
     border-left:5px solid var(--primary);
 }
 
-.card img{
-    width:48px;
-    margin-bottom:10px;
-}
-
 .card h3{
     font-size:.85em;
     color:#888;
@@ -135,12 +130,12 @@ button{
     </div>
 
     <div class="input-group">
-        <label>Silver por Lucky Coin (compra in-game)</label>
+        <label>Preço Lucky Coin (Silver – in-game)</label>
         <input id="silverLucky" type="number" value="2500000">
     </div>
 
     <div class="input-group">
-        <label>Preço pacote Lucky (BRL)</label>
+        <label>Preço do pacote Lucky (BRL)</label>
         <input id="pacoteBRL" type="number" value="220">
     </div>
 
@@ -150,29 +145,26 @@ button{
     </div>
 </div>
 
-<button onclick="executar()">🔄 Calcular</button>
+<button onclick="executar()">🔄 Calcular Arbitragem</button>
 
 <div class="results">
 
 <div class="card">
-<img src="token_200x200.png">
 <h3>Token (USD → BRL)</h3>
 <span id="tokenBRL" class="price">R$ 0,00</span>
 <span class="sub">Cotação automática</span>
 </div>
 
 <div class="card">
-<img src="lucky_200x200.png">
-<h3>Resultado Lucky Coin</h3>
-<span id="resLucky" class="price">—</span>
-<span class="sub">Preço ideal de venda (Silver)</span>
+<h3>Compra mais barata</h3>
+<span id="melhorCompra" class="price">—</span>
+<span id="detCompra" class="sub"></span>
 </div>
 
 <div class="card">
-<img src="silver_200x200.png">
-<h3>Comparação de compra</h3>
-<span id="melhorCompra" class="price">—</span>
-<span id="detCompra" class="sub"></span>
+<h3>Venda ideal Lucky Coin</h3>
+<span id="vendaLucky" class="price">—</span>
+<span class="sub">Preço em Silver (Lucky comprada com BRL)</span>
 </div>
 
 </div>
@@ -181,7 +173,7 @@ button{
 <script>
 async function executar(){
     const status = document.getElementById('status');
-    status.innerText = "⏳ Buscando dados...";
+    status.innerText = "⏳ Buscando cotações...";
 
     try{
         const dolarRes = await fetch('https://economia.awesomeapi.com.br/last/USD-BRL');
@@ -207,31 +199,31 @@ async function executar(){
 }
 
 function calcular(tokenBRL){
-    const lucro = parseFloat(lucroInput.value)/100;
+    const lucro = parseFloat(lucroInput.value) / 100;
     const silverToken = parseFloat(silverTokenInput.value);
     const silverLucky = parseFloat(silverLuckyInput.value);
     const pacoteBRL = parseFloat(pacoteBRLInput.value);
     const qtdLucky = parseFloat(qtdLuckyInput.value);
 
-    const valorSilverBRL = tokenBRL / silverToken;
+    const valorSilverEmBRL = tokenBRL / silverToken;
 
     const custoLuckyBRL = pacoteBRL / qtdLucky;
-    const custoLuckySilver = custoLuckyBRL / valorSilverBRL;
-
-    const precoVendaLuckySilver =
-        custoLuckySilver * (1 + lucro);
-
-    resLucky.innerText =
-        `${precoVendaLuckySilver.toFixed(0)} Silver`;
+    const custoLuckySilverViaBRL = custoLuckyBRL / valorSilverEmBRL;
 
     const melhor =
-        custoLuckySilver < silverLucky
+        custoLuckySilverViaBRL < silverLucky
         ? "Comprar Lucky com BRL"
         : "Comprar Lucky com Silver";
 
     melhorCompra.innerText = melhor;
     detCompra.innerText =
-        `BRL ≈ ${custoLuckySilver.toFixed(0)} Silver | In-game = ${silverLucky.toFixed(0)} Silver`;
+        `BRL ≈ ${custoLuckySilverViaBRL.toFixed(0)} Silver | In-game = ${silverLucky.toFixed(0)} Silver`;
+
+    const vendaIdealSilver =
+        custoLuckySilverViaBRL * (1 + lucro);
+
+    vendaLucky.innerText =
+        `${vendaIdealSilver.toFixed(0)} Silver`;
 }
 
 const lucroInput = document.getElementById('lucro');
