@@ -2,95 +2,78 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Calculadora Econômica - Conversão Real/Silver</title>
-
+<title>Calculadora de Revenda Silver</title>
 <style>
-body { font-family: 'Segoe UI', Arial, sans-serif; background: #111; color: #eee; padding: 20px; }
-h1 { text-align: center; color: #00b894; margin-bottom: 30px; }
-.container { max-width: 900px; margin: auto; background: #1c1c1c; padding: 25px; border-radius: 12px; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f0f0f; color: #e0e0e0; padding: 20px; }
+    .container { max-width: 800px; margin: auto; background: #181818; padding: 25px; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.8); border: 1px solid #333; }
+    h1 { text-align: center; color: #00b894; margin-bottom: 20px; }
+    
+    label { display: block; margin-top: 15px; color: #aaa; font-size: 0.9em; margin-bottom: 5px; }
+    input { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #444; background: #222; color: #fff; box-sizing: border-box; font-size: 16px; }
+    input:focus { border-color: #00b894; outline: none; }
 
-.input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; }
-label { display: block; margin-bottom: 8px; color: #aaa; font-size: 0.9em; }
-input { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #444; background: #222; color: #fff; box-sizing: border-box; font-size: 1em; }
-input:focus { border-color: #00b894; outline: none; background: #2a2a2a; }
+    .tabs { display: flex; gap: 5px; margin-top: 25px; background: #222; padding: 5px; border-radius: 8px; }
+    .tab { flex: 1; padding: 12px; cursor: pointer; text-align: center; border-radius: 6px; transition: 0.3s; font-weight: bold; color: #888; }
+    .tab.active { background: #00b894; color: #000; }
 
-.tabs { display: flex; gap: 5px; margin-top: 30px; }
-.tab { flex: 1; background: #333; padding: 15px; cursor: pointer; text-align: center; border-radius: 8px 8px 0 0; transition: 0.3s; font-weight: bold; border-bottom: 3px solid transparent; }
-.tab.active { background: #00b894; color: #000; border-bottom: 3px solid #008f72; }
+    .content { display: none; margin-top: 20px; padding: 20px; background: #222; border-radius: 8px; border: 1px solid #333; }
+    .content.active { display: block; }
 
-.content { display: none; padding: 25px; background: #262626; border-radius: 0 0 12px 12px; border: 1px solid #333; border-top: none; }
-.content.active { display: block; }
-
-.result-card { background: #1e272e; padding: 20px; border-radius: 8px; border-left: 6px solid #00b894; margin-bottom: 15px; }
-.result-card h3 { margin: 0 0 10px 0; font-size: 1.1em; color: #00b894; }
-.highlight { color: #00ff9d; font-weight: bold; font-size: 1.4em; }
-.info-row { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 5px; }
-
-.token-section { background: #2d3436; padding: 15px; border-radius: 8px; margin-top: 20px; border: 1px dashed #00b894; }
+    .result-box { background: #1a1a1a; padding: 20px; border-radius: 8px; border-left: 5px solid #00b894; margin-top: 10px; }
+    .highlight { color: #00ff9d; font-weight: bold; font-size: 1.5em; display: block; margin-top: 5px; }
+    .sub-info { color: #888; font-size: 0.85em; margin-top: 10px; }
+    
+    .stats { display: flex; justify-content: space-between; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #333; }
 </style>
 </head>
-
 <body>
 
-<h1>Calculadora de Venda (BRL)</h1>
-
 <div class="container">
-    
-    <div class="input-grid">
-        <div>
-            <label>📈 Lucro Desejado (%)</label>
-            <input id="lucroPct" type="number" placeholder="Ex: 15">
-        </div>
-        <div>
-            <label>💎 Preço 1M Silver Base (Direto)</label>
-            <input id="silverRealBase" type="number" step="0.01" placeholder="Se souber o preço em R$">
-        </div>
-    </div>
+    <h1>Calculadora de Venda</h1>
 
-    <div class="token-section">
-        <h3 style="margin-top:0; color: #00b894;">🔗 Conversão via Token$</h3>
-        <div class="input-grid">
-            <div>
-                <label>Preço do Token$ (R$)</label>
-                <input id="tokenReal" type="number" step="0.01" placeholder="Quanto pagou no Token">
-            </div>
-            <div>
-                <label>Valor do Token$ em Silver</label>
-                <input id="tokenSilver" type="number" placeholder="Ex: 5000000">
-            </div>
-        </div>
-    </div>
+    <label>📈 Margem de Lucro Desejada (%)</label>
+    <input id="lucroPct" type="number" placeholder="Ex: 20" value="0">
 
     <div class="tabs">
-        <div class="tab active" onclick="openTab(0)">💰 Venda de Silver</div>
-        <div class="tab" onclick="openTab(1)">🪙 Venda de Lucky Coin</div>
+        <div class="tab active" onclick="openTab(0)">🪙 Token (BRL)</div>
+        <div class="tab" onclick="openTab(1)">💰 Venda Silver</div>
+        <div class="tab" onclick="openTab(2)">🍀 Lucky Coin</div>
     </div>
 
     <div id="tab0" class="content active">
-        <div class="result-card">
-            <div class="info-row">
-                <span>Custo Real de 1M Silver:</span>
-                <span id="calcCustoSilver">R$ 0,00</span>
-            </div>
-            <h3>Preço de Venda Sugerido (1.000.000 Silver)</h3>
-            <div id="vendaSilverFinal" class="highlight">R$ 0,00</div>
-        </div>
+        <h3>Configurar Valor do Token</h3>
+        <label>Preço de Compra do Token (R$)</label>
+        <input id="tokenBRL" type="number" step="0.01" placeholder="Quanto você pagou pelo Token em R$">
         
-        <p style="font-size: 0.85em; color: #888;">
-            * Este cálculo define por quanto você deve vender seu Silver para outros jogadores para cobrir o custo do Token e ainda obter lucro.
-        </p>
+        <label>Valor de Venda do Token no Jogo (Silver)</label>
+        <input id="tokenSilver" type="number" placeholder="Ex: 5000000">
+        
+        <div class="result-box" style="border-left-color: #ff9f43;">
+            <div class="stats">
+                <span>Custo Real de 1M Silver:</span>
+                <span id="custoMilhaoBase">R$ 0,00</span>
+            </div>
+            <p class="sub-info">* Este é o valor que o Silver custa para você baseado no Token.</p>
+        </div>
     </div>
 
     <div id="tab1" class="content">
-        <div class="input-grid">
-            <div>
-                <label>Preço Lucky Coin (Silver)</label>
-                <input id="luckySilver" type="number" placeholder="Preço no mercado">
-            </div>
+        <h3>Preço de Venda para Jogadores</h3>
+        <div class="result-box">
+            <span>Preço p/ cada 1.000.000 Silver (BRL):</span>
+            <span id="vendaSilverBRL" class="highlight">R$ 0,00</span>
+            <div class="sub-info" id="infoVenda">Configure o Token na primeira aba</div>
         </div>
-        <div class="result-card">
-            <h3>Venda Sugerida (Lucky Coin)</h3>
-            <div id="vendaLuckyFinal" class="highlight">0 Silver</div>
+    </div>
+
+    <div id="tab2" class="content">
+        <h3>Conversão Lucky Coin</h3>
+        <label>Preço de Mercado da Lucky Coin (Silver)</label>
+        <input id="luckySilver" type="number" placeholder="Ex: 50000">
+        
+        <div class="result-box">
+            <span>Venda sugerida (em Silver):</span>
+            <span id="vendaLuckySilver" class="highlight">0 Silver</span>
         </div>
     </div>
 
@@ -105,49 +88,44 @@ function openTab(i){
 }
 
 function calcular(){
+    // Inputs
     const lucro = v(+document.getElementById('lucroPct').value) || 0;
-    const silverBase = v(+document.getElementById('silverRealBase').value);
-    
-    // Dados do Token
-    const tokenReal = v(+document.getElementById('tokenReal').value);
+    const tokenBRL = v(+document.getElementById('tokenBRL').value);
     const tokenSilver = v(+document.getElementById('tokenSilver').value);
-    
-    // Dados Lucky
     const luckySilver = v(+document.getElementById('luckySilver').value);
 
-    let custoUmMilhao = 0;
-
-    // Se tiver dados do Token, calcula o preço do milhão baseado no token
-    if (tokenReal && tokenSilver) {
-        // Regra de 3: (tokenReal / tokenSilver) * 1.000.000
-        custoUmMilhao = (tokenReal / tokenSilver) * 1_000_000;
-    } else if (silverBase) {
-        custoUmMilhao = silverBase;
+    // Cálculos Base
+    let custoMilhao = 0;
+    if (tokenBRL && tokenSilver) {
+        custoMilhao = (tokenBRL / tokenSilver) * 1000000;
     }
 
-    // Saída Silver
-    const elCusto = document.getElementById('calcCustoSilver');
-    const elVenda = document.getElementById('vendaSilverFinal');
+    // Atualiza Aba 0 (Custo Base)
+    document.getElementById('custoMilhaoBase').innerText = `R$ ${custoMilhao.toFixed(2)}`;
 
-    if (custoUmMilhao > 0) {
-        const precoVenda = custoUmMilhao * (1 + lucro/100);
-        elCusto.innerText = `R$ ${custoUmMilhao.toFixed(2)}`;
-        elVenda.innerText = `R$ ${precoVenda.toFixed(2)}`;
+    // Atualiza Aba 1 (Venda em BRL)
+    const vendaBRL = custoMilhao * (1 + lucro / 100);
+    const elVendaSilver = document.getElementById('vendaSilverBRL');
+    const elInfoVenda = document.getElementById('infoVenda');
+    
+    if(vendaBRL > 0) {
+        elVendaSilver.innerText = `R$ ${vendaBRL.toFixed(2)}`;
+        elInfoVenda.innerText = `Com ${lucro}% de lucro sobre o custo do Token.`;
     } else {
-        elCusto.innerText = "R$ 0,00";
-        elVenda.innerText = "Aguardando dados...";
+        elVendaSilver.innerText = "R$ 0,00";
     }
 
-    // Saída Lucky
-    const elLucky = document.getElementById('vendaLuckyFinal');
-    if (luckySilver) {
-        const precoLuckyVenda = Math.ceil(luckySilver * (1 + lucro/100));
+    // Atualiza Aba 2 (Lucky em Silver)
+    const elLucky = document.getElementById('vendaLuckySilver');
+    if(luckySilver) {
+        const precoLuckyVenda = Math.ceil(luckySilver * (1 + lucro / 100));
         elLucky.innerText = `${precoLuckyVenda.toLocaleString()} Silver`;
     } else {
-        elLucky.innerText = "---";
+        elLucky.innerText = "0 Silver";
     }
 }
 
+// Escutar todos os inputs
 document.querySelectorAll('input').forEach(i => i.addEventListener('input', calcular));
 </script>
 
