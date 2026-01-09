@@ -150,7 +150,7 @@ button{
     </div>
 </div>
 
-<button onclick="executar()">🔄 Calcular Arbitragem</button>
+<button onclick="executar()">🔄 Calcular</button>
 
 <div class="results">
 
@@ -163,16 +163,16 @@ button{
 
 <div class="card">
 <img src="lucky_200x200.png">
-<h3>Compra mais barata</h3>
-<span id="melhorCompra" class="price">—</span>
-<span id="detCompra" class="sub"></span>
+<h3>Resultado Lucky Coin</h3>
+<span id="resLucky" class="price">—</span>
+<span class="sub">Preço ideal de venda (Silver)</span>
 </div>
 
 <div class="card">
 <img src="silver_200x200.png">
-<h3>Venda ideal Lucky (em Silver)</h3>
-<span id="vendaLucky" class="price">—</span>
-<span class="sub">Lucky comprada com BRL</span>
+<h3>Comparação de compra</h3>
+<span id="melhorCompra" class="price">—</span>
+<span id="detCompra" class="sub"></span>
 </div>
 
 </div>
@@ -199,7 +199,7 @@ async function executar(){
             `R$ ${tokenBRL.toFixed(2)}`;
 
         calcular(tokenBRL);
-        status.innerText = "✅ Arbitragem calculada";
+        status.innerText = "✅ Cálculo concluído";
 
     }catch{
         status.innerText = "⚠️ Erro ao buscar dados externos";
@@ -216,22 +216,22 @@ function calcular(tokenBRL){
     const valorSilverBRL = tokenBRL / silverToken;
 
     const custoLuckyBRL = pacoteBRL / qtdLucky;
-    const custoLuckySilverViaBRL = custoLuckyBRL / valorSilverBRL;
+    const custoLuckySilver = custoLuckyBRL / valorSilverBRL;
+
+    const precoVendaLuckySilver =
+        custoLuckySilver * (1 + lucro);
+
+    resLucky.innerText =
+        `${precoVendaLuckySilver.toFixed(0)} Silver`;
 
     const melhor =
-        custoLuckySilverViaBRL < silverLucky
-        ? "Comprar com BRL"
-        : "Comprar com Silver";
+        custoLuckySilver < silverLucky
+        ? "Comprar Lucky com BRL"
+        : "Comprar Lucky com Silver";
 
     melhorCompra.innerText = melhor;
     detCompra.innerText =
-        `BRL ≈ ${custoLuckySilverViaBRL.toFixed(0)} Silver | In-game = ${silverLucky.toFixed(0)} Silver`;
-
-    const vendaIdealSilver =
-        custoLuckySilverViaBRL * (1 + lucro);
-
-    vendaLucky.innerText =
-        `${vendaIdealSilver.toFixed(0)} Silver`;
+        `BRL ≈ ${custoLuckySilver.toFixed(0)} Silver | In-game = ${silverLucky.toFixed(0)} Silver`;
 }
 
 const lucroInput = document.getElementById('lucro');
