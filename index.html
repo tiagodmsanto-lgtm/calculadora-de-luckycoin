@@ -79,7 +79,7 @@ small{color:#64748b}
     <button onclick="openTab(3)">Venda Silver</button>
 </div>
 
-<!-- ABA 0 -->
+<!-- ABA 0 — COTAÇÃO -->
 <div class="section active">
 <h2>Cotação Token / Silver (Automática)</h2>
 
@@ -92,7 +92,7 @@ small{color:#64748b}
 <div class="result" id="resCotacao">Carregando cotação...</div>
 </div>
 
-<!-- ABA 1 -->
+<!-- ABA 1 — COMPARAR -->
 <div class="section">
 <h2>Comparar compra da Lucky Coin</h2>
 
@@ -112,7 +112,7 @@ small{color:#64748b}
 <div class="result" id="resComparar"></div>
 </div>
 
-<!-- ABA 2 -->
+<!-- ABA 2 — VENDA LUCKY -->
 <div class="section">
 <h2>Venda da Lucky Coin por Silver</h2>
 
@@ -129,7 +129,7 @@ small{color:#64748b}
 <div class="result" id="resVenda"></div>
 </div>
 
-<!-- ABA 3 -->
+<!-- ABA 3 — VENDA SILVER -->
 <div class="section">
 <h2>Venda de Silver</h2>
 
@@ -151,7 +151,7 @@ function openTab(i){
     });
 }
 
-// Cotação
+// Cotação automática
 async function carregarCotacao(){
     try{
         const res = await fetch(
@@ -175,7 +175,7 @@ async function carregarCotacao(){
     }
 }
 
-// ABA 1 (ALTERAÇÃO AQUI)
+// ABA 1 — COMPARAR (CORRIGIDA)
 function compararLucky(){
     const luckyGame = Number(luckySilverGame.value);
     const pacote = Number(pacoteBRL1.value);
@@ -184,7 +184,9 @@ function compararLucky(){
 
     const custoLuckyBRL = pacote / qtd;
     const custoLuckySilver = custoLuckyBRL / valorSilverBRL;
-    const precoVenda = custoLuckySilver * (1+lucro);
+
+    const precoVendaUnit = custoLuckySilver * (1 + lucro);
+    const precoVendaPacote = precoVendaUnit * qtd;
 
     const melhor = custoLuckySilver < luckyGame ? "BRL" : "Silver";
 
@@ -192,7 +194,9 @@ function compararLucky(){
     Lucky via Silver: <b>${luckyGame.toFixed(0)} Silver</b><br>
     Lucky via BRL: <b>R$ ${custoLuckyBRL.toFixed(2)} BRL</b><br>
     Mais barata: <b>${melhor}</b><br><br>
-    Venda ideal: <b>${precoVenda.toFixed(0)} Silver</b>
+
+    Venda ideal do pacote (${qtd} Lucky):<br>
+    <b>${precoVendaPacote.toFixed(0)} Silver</b>
     `;
 }
 
