@@ -64,7 +64,6 @@ button.calc{
     border-radius:10px;
     line-height:1.6;
 }
-small{color:#64748b}
 </style>
 </head>
 
@@ -89,6 +88,17 @@ small{color:#64748b}
 <label>1 Token equivale a quantos Silver</label>
 <input id="tokenSilver" type="number" value="1000000">
 
+<hr>
+
+<label>Valor do pacote Lucky Coin (BRL)</label>
+<input id="pacoteBRL" type="number">
+
+<label>Quantidade de Lucky Coin no pacote</label>
+<input id="qtdLucky" type="number">
+
+<label>Margem de lucro desejada (%)</label>
+<input id="lucro" type="number">
+
 <div class="result" id="resCotacao">Carregando cotação...</div>
 </div>
 
@@ -99,15 +109,6 @@ small{color:#64748b}
 <label>Preço da Lucky Coin em Silver (in-game)</label>
 <input id="luckySilverGame" type="number">
 
-<label>Preço do pacote Lucky Coin (BRL)</label>
-<input id="pacoteBRL1" type="number">
-
-<label>Quantidade de Lucky Coin no pacote</label>
-<input id="qtdLucky1" type="number">
-
-<label>Margem de lucro (%)</label>
-<input id="lucro1" type="number">
-
 <button class="calc" onclick="compararLucky()">Calcular</button>
 <div class="result" id="resComparar"></div>
 </div>
@@ -115,15 +116,6 @@ small{color:#64748b}
 <!-- ABA 2 — VENDA LUCKY -->
 <div class="section">
 <h2>Venda da Lucky Coin por Silver</h2>
-
-<label>Preço do pacote Lucky Coin (BRL)</label>
-<input id="pacoteBRL2" type="number">
-
-<label>Quantidade de Lucky Coin no pacote</label>
-<input id="qtdLucky2" type="number">
-
-<label>Margem de lucro (%)</label>
-<input id="lucro2" type="number">
 
 <button class="calc" onclick="vendaLucky()">Calcular</button>
 <div class="result" id="resVenda"></div>
@@ -175,47 +167,40 @@ async function carregarCotacao(){
     }
 }
 
-// ABA 1 — COMPARAR (CORRIGIDA)
+// ABA 1 — COMPARAR (SEM VENDA IDEAL)
 function compararLucky(){
     const luckyGame = Number(luckySilverGame.value);
-    const pacote = Number(pacoteBRL1.value);
-    const qtd = Number(qtdLucky1.value);
-    const lucro = Number(lucro1.value)/100;
+    const pacote = Number(pacoteBRL.value);
+    const qtd = Number(qtdLucky.value);
 
     const custoLuckyBRL = pacote / qtd;
     const custoLuckySilver = custoLuckyBRL / valorSilverBRL;
 
-    const precoVendaUnit = custoLuckySilver * (1 + lucro);
-    const precoVendaPacote = precoVendaUnit * qtd;
-
     const melhor = custoLuckySilver < luckyGame ? "BRL" : "Silver";
 
     resComparar.innerHTML = `
-    Lucky via Silver: <b>${luckyGame.toFixed(0)} Silver</b><br>
-    Lucky via BRL: <b>R$ ${custoLuckyBRL.toFixed(2)} BRL</b><br>
-    Mais barata: <b>${melhor}</b><br><br>
-
-    Venda ideal do pacote (${qtd} Lucky):<br>
-    <b>${precoVendaPacote.toFixed(0)} Silver</b>
+    Lucky comprada com Silver: <b>${luckyGame.toFixed(0)} Silver</b><br>
+    Lucky comprada com BRL: <b>${custoLuckySilver.toFixed(0)} Silver</b><br><br>
+    Forma mais barata: <b>${melhor}</b>
     `;
 }
 
-// ABA 2
+// ABA 2 — VENDA LUCKY
 function vendaLucky(){
-    const pacote = Number(pacoteBRL2.value);
-    const qtd = Number(qtdLucky2.value);
-    const lucro = Number(lucro2.value)/100;
+    const pacote = Number(pacoteBRL.value);
+    const qtd = Number(qtdLucky.value);
+    const lucroPct = Number(lucro.value)/100;
 
     const custoSilver = (pacote/qtd)/valorSilverBRL;
-    const venda = custoSilver*(1+lucro);
+    const venda = custoSilver*(1+lucroPct);
 
     resVenda.innerHTML = `
-    Custo: <b>${custoSilver.toFixed(0)} Silver</b><br>
+    Custo por Lucky: <b>${custoSilver.toFixed(0)} Silver</b><br>
     Venda ideal: <b>${venda.toFixed(0)} Silver</b>
     `;
 }
 
-// ABA 3
+// ABA 3 — VENDA SILVER
 function vendaSilver(){
     resSilver.innerHTML = `
     1.000.000 Silver = <b>R$ ${(valorSilverBRL*1_000_000).toFixed(2)}</b>
