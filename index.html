@@ -61,7 +61,7 @@ button.calc{
     background:#020617;
     padding:14px;
     border-radius:10px;
-    line-height:1.5;
+    line-height:1.6;
 }
 </style>
 </head>
@@ -78,12 +78,12 @@ button.calc{
 
 <!-- ================= ABA 1 ================= -->
 <div class="section active">
-<h2>🟢 Comparar compra da Lucky Coin</h2>
+<h2>Comparar compra da Lucky Coin</h2>
 
 <label>Preço da Lucky Coin em Silver (in-game)</label>
 <input id="luckySilverGame" type="number">
 
-<label>Preço do pacote Lucky Coin (BRL)</label>
+<label>Preço do pacote de Lucky Coin (BRL)</label>
 <input id="pacoteBRL1" type="number">
 
 <label>Quantidade de Lucky Coin no pacote</label>
@@ -98,15 +98,15 @@ button.calc{
 
 <!-- ================= ABA 2 ================= -->
 <div class="section">
-<h2>🟢 Venda da Lucky Coin por Silver</h2>
+<h2>Venda da Lucky Coin por Silver</h2>
 
-<label>Preço do pacote Lucky Coin (BRL)</label>
+<label>Preço do pacote de Lucky Coin (BRL)</label>
 <input id="pacoteBRL2" type="number">
 
 <label>Quantidade de Lucky Coin no pacote</label>
 <input id="qtdLucky2" type="number">
 
-<label>Lucro desejado (%)</label>
+<label>Margem de lucro desejada (%)</label>
 <input id="lucro2" type="number">
 
 <button class="calc" onclick="vendaLucky()">Calcular</button>
@@ -115,57 +115,70 @@ button.calc{
 
 <!-- ================= ABA 3 ================= -->
 <div class="section">
-<h2>🟢 Cotação Token / Silver (Automática)</h2>
+<h2>Cotação Token / Silver (Automática)</h2>
+
+<label>Valor de 1 Token em Silver (fixo do jogo)</label>
+<input id="tokenSilver" type="number" value="1000000">
+
 <div class="result" id="resCotacao">Carregando cotação...</div>
 </div>
 
 <script>
+// ================= CONFIGURAÇÕES =================
+const POOL_ID = "0xbe2930d274f862542740dcdc95257b3163172343";
+const USD_BRL = 5.10; // taxa fixa configurável
+
+// ================= ESTADO GLOBAL =================
 let valorSilverBRL = 0;
 
 // ================= TABS =================
 function openTab(i){
     document.querySelectorAll('.section').forEach((s,idx)=>{
-        s.classList.toggle('active', idx===i);
+        s.classList.toggle('active', idx === i);
     });
     document.querySelectorAll('.tabs button').forEach((b,idx)=>{
-        b.classList.toggle('active', idx===i);
+        b.classList.toggle('active', idx === i);
     });
 }
 
-// ================= COTAÇÃO AUTOMÁTICA =================
+// ================= ABA 3 — AUTOMÁTICA =================
 async function carregarCotacao(){
-    const POOL_ID = "0xbe2930d274f862542740dcdc95257b3163172343";
-    const USD_BRL = 5.10; // ajuste se quiser
+    try{
+        const res = await fetch(
+            `https://api.geckoterminal.com/api/v2/networks/immutable-zkevm/pools/${POOL_ID}`
+        );
+        const json = await res.json();
 
-    const res = await fetch(
-        `https://api.geckoterminal.com/api/v2/networks/immutable-zkevm/pools/${POOL_ID}`
-    );
-    const data = await res.json();
+        const tokenUSD = Number(
+            json.data.attributes.base_token_price_usd
+        );
 
-    const tokenUSD = parseFloat(
-        data.data.attributes.base_token_price_usd
-    );
+        const tokenBRL = tokenUSD * USD_BRL;
 
-    const tokenBRL = tokenUSD * USD_BRL;
+        const tokenSilver = Number(
+            document.getElementById("tokenSilver").value
+        );
 
-    // VALOR DO TOKEN EM SILVER (fixo do jogo)
-    const TOKEN_EM_SILVER = 1_000_000;
+        valorSilverBRL = tokenBRL / tokenSilver;
 
-    valorSilverBRL = tokenBRL / TOKEN_EM_SILVER;
-
-    document.getElementById("resCotacao").innerHTML = `
-    Token RavenQuest: <b>R$ ${tokenBRL.toFixed(6)}</b><br>
-    1.000.000 Silver: <b>R$ ${(valorSilverBRL * 1_000_000).toFixed(2)}</b><br>
-    <small>Fonte: GeckoTerminal (atualização automática)</small>
-    `;
+        document.getElementById("resCotacao").innerHTML = `
+        Token (USD): <b>$ ${tokenUSD.toFixed(6)}</b><br>
+        Token (BRL): <b>R$ ${tokenBRL.toFixed(6)}</b><br><br>
+        1 Silver = <b>R$ ${valorSilverBRL.toFixed(8)}</b><br>
+        1.000.000 Silver = <b>R$ ${(valorSilverBRL*1_000_000).toFixed(2)}</b>
+        `;
+    }catch(e){
+        document.getElementById("resCotacao").innerHTML =
+            "Erro ao carregar cotação.";
+    }
 }
 
 // ================= ABA 1 =================
 function compararLucky(){
-    const luckyGame = +luckySilverGame.value;
-    const pacote = +pacoteBRL1.value;
-    const qtd = +qtdLucky1.value;
-    const lucro = +lucro1.value / 100;
+    const luckyGame = Number(luckySilverGame.value);
+    const pacote = Number(pacoteBRL1.value);
+    const qtd = Number(qtdLucky1.value);
+    const lucro = Number(lucro1.value) / 100;
 
     const custoLuckyBRL = pacote / qtd;
     const custoLuckySilver = custoLuckyBRL / valorSilverBRL;
@@ -173,36 +186,39 @@ function compararLucky(){
 
     const melhor =
         custoLuckySilver < luckyGame
-        ? "Comprar com BRL é mais barato"
-        : "Comprar com Silver é mais barato";
+        ? "Comprar Lucky com BRL é mais barato"
+        : "Comprar Lucky com Silver é mais barato";
 
     resComparar.innerHTML = `
     Lucky via Silver: <b>${luckyGame.toLocaleString()} Silver</b><br>
-    Lucky via BRL: <b>${custoLuckySilver.toLocaleString()} Silver</b><br><br>
+    Lucky via BRL: <b>${custoLuckySilver.toFixed(0)} Silver</b><br><br>
     <strong>${melhor}</strong><br><br>
     Preço ideal de venda:<br>
-    <b>${precoVenda.toLocaleString()} Silver</b>
+    <b>${precoVenda.toFixed(0)} Silver</b>
     `;
 }
 
 // ================= ABA 2 =================
 function vendaLucky(){
-    const pacote = +pacoteBRL2.value;
-    const qtd = +qtdLucky2.value;
-    const lucro = +lucro2.value / 100;
+    const pacote = Number(pacoteBRL2.value);
+    const qtd = Number(qtdLucky2.value);
+    const lucro = Number(lucro2.value) / 100;
 
     const custoLuckyBRL = pacote / qtd;
     const custoLuckySilver = custoLuckyBRL / valorSilverBRL;
     const precoVenda = custoLuckySilver * (1 + lucro);
 
     resVenda.innerHTML = `
-    Custo da Lucky: <b>${custoLuckySilver.toLocaleString()} Silver</b><br>
+    Custo da Lucky: <b>${custoLuckySilver.toFixed(0)} Silver</b><br>
     Preço ideal de venda:<br>
-    <strong>${precoVenda.toLocaleString()} Silver</strong>
+    <strong>${precoVenda.toFixed(0)} Silver</strong>
     `;
 }
 
-// AUTOLOAD
+// ================= INIT =================
+document.getElementById("tokenSilver")
+    .addEventListener("change", carregarCotacao);
+
 carregarCotacao();
 </script>
 
