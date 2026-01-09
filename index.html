@@ -64,7 +64,6 @@ button.calc{
     border-radius:10px;
     line-height:1.6;
 }
-a{color:#38bdf8}
 </style>
 </head>
 
@@ -83,12 +82,8 @@ a{color:#38bdf8}
 <div class="section active">
 <h2>Cotação Token / Silver (Automática)</h2>
 
-<small>
-Referência visual:
-<a href="https://br.tradingview.com/symbols/USDBRL/" target="_blank">
-TradingView USD/BRL
-</a>
-</small><br><br>
+<label>USD → BRL (automático)</label>
+<input id="usdBrl" disabled>
 
 <label>1 Token equivale a quantos Silver</label>
 <input id="tokenSilver" type="number" value="1000000">
@@ -136,10 +131,11 @@ TradingView USD/BRL
 
 <script>
 const POOL_ID = "0xbe2930d274f862542740dcdc95257b3163172343";
-let valorSilverBRL = 0;
-let usdBrl = 0;
 
-// Tabs
+let usdBRL = 0;
+let valorSilverBRL = 0;
+
+// ---------- TABS ----------
 function openTab(i){
     document.querySelectorAll('.section').forEach((s,idx)=>{
         s.classList.toggle('active', idx===i);
@@ -149,17 +145,18 @@ function openTab(i){
     });
 }
 
-// Busca USD → BRL automática
-async function carregarUSDBRL(){
-    const res = await fetch("https://api.exchangerate.host/latest?base=USD&symbols=BRL");
+// ---------- USD → BRL ----------
+async function carregarUsdBrl(){
+    const res = await fetch("https://economia.awesomeapi.com.br/last/USD-BRL");
     const json = await res.json();
-    usdBrl = json.rates.BRL;
+    usdBRL = Number(json.USDBRL.bid);
+    document.getElementById("usdBrl").value = usdBRL.toFixed(4);
 }
 
-// Cotação completa
+// ---------- TOKEN / SILVER ----------
 async function carregarCotacao(){
     try{
-        await carregarUSDBRL();
+        await carregarUsdBrl();
 
         const res = await fetch(
             `https://api.geckoterminal.com/api/v2/networks/immutable-zkevm/pools/${POOL_ID}`
@@ -167,55 +164,72 @@ async function carregarCotacao(){
         const json = await res.json();
 
         const tokenUSD = Number(json.data.attributes.base_token_price_usd);
-        if(!tokenUSD || !usdBrl) throw "";
+        const tokenBRL = tokenUSD * usdBRL;
 
-        const tokenBRL = tokenUSD * usdBrl;
-        valorSilverBRL = tokenBRL / Number(tokenSilver.value);
+        const silverPorToken = Number(tokenSilver.value);
+        valorSilverBRL = tokenBRL / silverPorToken;
 
         resCotacao.innerHTML = `
-        USD → BRL: <b>${usdBrl.toFixed(4)}</b><br>
+        USD → BRL: <b>R$ ${usdBRL.toFixed(4)}</b><br>
         Token USD: <b>$ ${tokenUSD.toFixed(6)}</b><br>
         Token BRL: <b>R$ ${tokenBRL.toFixed(6)}</b><br><br>
         1.000.000 Silver = <b>R$ ${(valorSilverBRL*1_000_000).toFixed(2)}</b>
         `;
     }catch{
-        resCotacao.innerHTML = "❌ Erro ao carregar cotações.";
+        resCotacao.innerHTML = "❌ Erro ao validar preço do token ou câmbio.";
     }
 }
 
-// ABA 1
+// ---------- ABA 1 ----------
 function compararLucky(){
     const luckyGame = Number(luckySilverGame.value);
     const pacote = Number(pacoteBRL.value);
     const qtd = Number(qtdLucky.value);
 
-    const custoSilver = (pacote/qtd)/valorSilverBRL;
-    const melhor = custoSilver < luckyGame ? "BRL" : "Silver";
+    if(!valorSilverBRL || !luckyGame || !pacote || !qtd){
+        resComparar.innerHTML = "❌ Preencha todos os campos.";
+        return;
+    }
+
+    const custoLuckyBRL = pacote / qtd;
+    const custoLuckySilver = custoLuckyBRL / valorSilverBRL;
+
+    const melhor = custoLuckySilver < luckyGame ? "Comprar com BRL" : "Comprar com Silver";
 
     resComparar.innerHTML = `
-    Lucky via Silver: <b>${luckyGame.toFixed(0)} Silver</b><br>
-    Lucky via BRL: <b>${custoSilver.toFixed(0)} Silver</b><br><br>
-    Mais barata: <b>${melhor}</b>
+    Lucky com Silver: <b>${luckyGame.toFixed(0)} Silver</b><br>
+    Lucky com BRL: <b>${custoLuckySilver.toFixed(0)} Silver</b><br><br>
+    Melhor opção: <b>${melhor}</b>
     `;
 }
 
-// ABA 2
+// ---------- ABA 2 ----------
 function vendaLucky(){
     const pacote = Number(pacoteBRL.value);
     const qtd = Number(qtdLucky.value);
     const lucroPct = Number(lucro.value)/100;
 
-    const custo = (pacote/qtd)/valorSilverBRL;
-    const venda = custo*(1+lucroPct);
+    if(!valorSilverBRL || !pacote || !qtd){
+        resVenda.innerHTML = "❌ Preencha os dados na aba Cotação.";
+        return;
+    }
+
+    const custoSilver = (pacote/qtd)/valorSilverBRL;
+    const venda = custoSilver*(1+lucroPct);
 
     resVenda.innerHTML = `
-    Custo: <b>${custo.toFixed(0)} Silver</b><br>
+    Custo por Lucky: <b>${custoSilver.toFixed(0)} Silver</b><br>
     Venda ideal: <b>${venda.toFixed(0)} Silver</b>
     `;
 }
 
-// ABA 3
+// ---------- ABA 3 ----------
 function vendaSilver(){
+    if(!valorSilverBRL){
+        resSilver.innerHTML = "❌ Cotação indisponível.";
+        return;
+    }
+
     resSilver.innerHTML = `
     1.000.000 Silver = <b>R$ ${(valorSilverBRL*1_000_000).toFixed(2)}</b>
     `;
