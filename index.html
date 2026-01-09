@@ -63,6 +63,10 @@ button.calc{
     border-radius:10px;
     line-height:1.6;
 }
+.warn{
+    color:#fbbf24;
+    font-size:0.9em;
+}
 </style>
 </head>
 
@@ -125,7 +129,7 @@ button.calc{
 
 <script>
 // ================= CONFIGURAÇÕES =================
-const POOL_ID = "0xbe2930d274f862542740dcdc95257b3163172343";
+const TOKEN_ADDRESS = "0xbe2930d274f862542740dcdc95257b3163172343";
 const USD_BRL = 5.10; // taxa fixa configurável
 
 // ================= ESTADO GLOBAL =================
@@ -141,18 +145,15 @@ function openTab(i){
     });
 }
 
-// ================= ABA 3 — AUTOMÁTICA =================
+// ================= ABA 3 — COTAÇÃO BASE =================
 async function carregarCotacao(){
     try{
         const res = await fetch(
-            `https://api.geckoterminal.com/api/v2/networks/immutable-zkevm/pools/${POOL_ID}`
+            `https://api.geckoterminal.com/api/v2/tokens/${TOKEN_ADDRESS}`
         );
         const json = await res.json();
 
-        const tokenUSD = Number(
-            json.data.attributes.base_token_price_usd
-        );
-
+        const tokenUSD = Number(json.data.attributes.price_usd);
         const tokenBRL = tokenUSD * USD_BRL;
 
         const tokenSilver = Number(
@@ -165,16 +166,22 @@ async function carregarCotacao(){
         Token (USD): <b>$ ${tokenUSD.toFixed(6)}</b><br>
         Token (BRL): <b>R$ ${tokenBRL.toFixed(6)}</b><br><br>
         1 Silver = <b>R$ ${valorSilverBRL.toFixed(8)}</b><br>
-        1.000.000 Silver = <b>R$ ${(valorSilverBRL*1_000_000).toFixed(2)}</b>
+        1.000.000 Silver = <b>R$ ${(valorSilverBRL * 1_000_000).toFixed(2)}</b>
         `;
     }catch(e){
         document.getElementById("resCotacao").innerHTML =
-            "Erro ao carregar cotação.";
+            "Erro ao carregar cotação do token.";
     }
 }
 
 // ================= ABA 1 =================
 function compararLucky(){
+    if(valorSilverBRL <= 0){
+        resComparar.innerHTML =
+            "<span class='warn'>⚠️ Aguarde a cotação do token.</span>";
+        return;
+    }
+
     const luckyGame = Number(luckySilverGame.value);
     const pacote = Number(pacoteBRL1.value);
     const qtd = Number(qtdLucky1.value);
@@ -200,6 +207,12 @@ function compararLucky(){
 
 // ================= ABA 2 =================
 function vendaLucky(){
+    if(valorSilverBRL <= 0){
+        resVenda.innerHTML =
+            "<span class='warn'>⚠️ Aguarde a cotação do token.</span>";
+        return;
+    }
+
     const pacote = Number(pacoteBRL2.value);
     const qtd = Number(qtdLucky2.value);
     const lucro = Number(lucro2.value) / 100;
