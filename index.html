@@ -1,132 +1,208 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Calculadora de Revenda Silver</title>
-<style>
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f0f0f; color: #e0e0e0; padding: 20px; }
-    .container { max-width: 800px; margin: auto; background: #181818; padding: 25px; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.8); border: 1px solid #333; }
-    h1 { text-align: center; color: #00b894; margin-bottom: 20px; }
-    
-    label { display: block; margin-top: 15px; color: #aaa; font-size: 0.9em; margin-bottom: 5px; }
-    input { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #444; background: #222; color: #fff; box-sizing: border-box; font-size: 16px; }
-    input:focus { border-color: #00b894; outline: none; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Venda Profissional - Silver & Lucky</title>
+    <style>
+        :root {
+            --primary: #00b894;
+            --bg: #0f0f0f;
+            --card-bg: #1c1c1c;
+            --text: #eee;
+        }
 
-    .tabs { display: flex; gap: 5px; margin-top: 25px; background: #222; padding: 5px; border-radius: 8px; }
-    .tab { flex: 1; padding: 12px; cursor: pointer; text-align: center; border-radius: 6px; transition: 0.3s; font-weight: bold; color: #888; }
-    .tab.active { background: #00b894; color: #000; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, sans-serif; 
+            background-color: var(--bg); 
+            color: var(--text); 
+            margin: 0; 
+            padding: 20px; 
+        }
 
-    .content { display: none; margin-top: 20px; padding: 20px; background: #222; border-radius: 8px; border: 1px solid #333; }
-    .content.active { display: block; }
+        .container { 
+            max-width: 900px; 
+            margin: auto; 
+            background: var(--card-bg); 
+            padding: 30px; 
+            border-radius: 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid #333;
+        }
 
-    .result-box { background: #1a1a1a; padding: 20px; border-radius: 8px; border-left: 5px solid #00b894; margin-top: 10px; }
-    .highlight { color: #00ff9d; font-weight: bold; font-size: 1.5em; display: block; margin-top: 5px; }
-    .sub-info { color: #888; font-size: 0.85em; margin-top: 10px; }
-    
-    .stats { display: flex; justify-content: space-between; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #333; }
-</style>
+        h1 { text-align: center; color: var(--primary); margin-bottom: 30px; }
+
+        .grid-inputs { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 20px; 
+            margin-bottom: 25px; 
+        }
+
+        .input-group { display: flex; flex-direction: column; }
+
+        label { font-size: 0.85em; color: #888; margin-bottom: 8px; }
+
+        input { 
+            background: #111; 
+            border: 1px solid #444; 
+            color: #fff; 
+            padding: 12px; 
+            border-radius: 8px; 
+            font-size: 1em; 
+        }
+
+        input:focus { border-color: var(--primary); outline: none; }
+
+        .btn-sync { 
+            background: var(--primary); 
+            color: #000; 
+            border: none; 
+            padding: 15px; 
+            border-radius: 8px; 
+            font-weight: bold; 
+            font-size: 1em; 
+            cursor: pointer; 
+            width: 100%; 
+            margin-bottom: 20px; 
+            transition: 0.3s;
+        }
+
+        .btn-sync:hover { background: #009476; transform: translateY(-2px); }
+
+        .results-area { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+            gap: 20px; 
+        }
+
+        .card { 
+            background: #252525; 
+            padding: 20px; 
+            border-radius: 10px; 
+            border-left: 5px solid var(--primary); 
+        }
+
+        .card h3 { margin: 0 0 10px 0; font-size: 0.9em; color: #888; text-transform: uppercase; }
+
+        .price { font-size: 1.8em; font-weight: bold; color: #fff; display: block; }
+
+        .sub { font-size: 0.8em; color: var(--primary); margin-top: 5px; display: block; }
+
+        #status { text-align: center; font-size: 0.9em; margin-bottom: 15px; color: #aaa; }
+    </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Calculadora de Venda</h1>
+    <h1>Calculadora Econômica</h1>
 
-    <label>📈 Margem de Lucro Desejada (%)</label>
-    <input id="lucroPct" type="number" placeholder="Ex: 20" value="0">
+    <div id="status">Clique no botão para atualizar cotações</div>
 
-    <div class="tabs">
-        <div class="tab active" onclick="openTab(0)">🪙 Token (BRL)</div>
-        <div class="tab" onclick="openTab(1)">💰 Venda Silver</div>
-        <div class="tab" onclick="openTab(2)">🍀 Lucky Coin</div>
-    </div>
-
-    <div id="tab0" class="content active">
-        <h3>Configurar Valor do Token</h3>
-        <label>Preço de Compra do Token (R$)</label>
-        <input id="tokenBRL" type="number" step="0.01" placeholder="Quanto você pagou pelo Token em R$">
-        
-        <label>Valor de Venda do Token no Jogo (Silver)</label>
-        <input id="tokenSilver" type="number" placeholder="Ex: 5000000">
-        
-        <div class="result-box" style="border-left-color: #ff9f43;">
-            <div class="stats">
-                <span>Custo Real de 1M Silver:</span>
-                <span id="custoMilhaoBase">R$ 0,00</span>
-            </div>
-            <p class="sub-info">* Este é o valor que o Silver custa para você baseado no Token.</p>
+    <div class="grid-inputs">
+        <div class="input-group">
+            <label>Margem de Lucro (%)</label>
+            <input id="lucroPct" type="number" value="15">
+        </div>
+        <div class="input-group">
+            <label>Token Valor (USD)</label>
+            <input id="tokenUSD" type="number" step="0.01" value="20.00">
+        </div>
+        <div class="input-group">
+            <label>Token no Jogo (Silver)</label>
+            <input id="tokenSilver" type="number" value="5000000">
+        </div>
+        <div class="input-group">
+            <label>Lucky Coin (Silver)</label>
+            <input id="luckySilver" type="number" value="50000">
         </div>
     </div>
 
-    <div id="tab1" class="content">
-        <h3>Preço de Venda para Jogadores</h3>
-        <div class="result-box">
-            <span>Preço p/ cada 1.000.000 Silver (BRL):</span>
-            <span id="vendaSilverBRL" class="highlight">R$ 0,00</span>
-            <div class="sub-info" id="infoVenda">Configure o Token na primeira aba</div>
+    <button class="btn-sync" onclick="main()">🔄 Atualizar e Calcular Venda</button>
+
+    <div class="results-area">
+        <div class="card">
+            <h3>Dólar Hoje</h3>
+            <span id="resDolar" class="price">R$ 0,00</span>
+            <span class="sub">Cotação Comercial</span>
+        </div>
+        <div class="card">
+            <h3>Custo Token BRL</h3>
+            <span id="resTokenBRL" class="price" style="color: #ff9f43;">R$ 0,00</span>
+            <span class="sub">Valor convertido</span>
+        </div>
+        <div class="card">
+            <h3>Venda 1M Silver</h3>
+            <span id="resVendaSilver" class="price" style="color: #00ff9d;">R$ 0,00</span>
+            <span id="lucroSilver" class="sub">Lucro: R$ 0,00</span>
+        </div>
+        <div class="card">
+            <h3>Venda Lucky Coin</h3>
+            <span id="resVendaLucky" class="price" style="color: #00ff9d;">R$ 0,00</span>
+            <span id="lucroLucky" class="sub">Lucro: R$ 0,00</span>
         </div>
     </div>
-
-    <div id="tab2" class="content">
-        <h3>Conversão Lucky Coin</h3>
-        <label>Preço de Mercado da Lucky Coin (Silver)</label>
-        <input id="luckySilver" type="number" placeholder="Ex: 50000">
-        
-        <div class="result-box">
-            <span>Venda sugerida (em Silver):</span>
-            <span id="vendaLuckySilver" class="highlight">0 Silver</span>
-        </div>
-    </div>
-
 </div>
 
 <script>
-function v(n){ return isFinite(n) && n > 0 ? n : null }
+    async function main() {
+        const status = document.getElementById('status');
+        status.innerText = "⏳ Sincronizando dados...";
 
-function openTab(i){
-    document.querySelectorAll('.tab').forEach((t,x)=>t.classList.toggle('active',x===i))
-    document.querySelectorAll('.content').forEach((c,x)=>c.classList.toggle('active',x===i))
-}
+        try {
+            // 1. Pega Cotação do Dólar Real
+            const responseDolar = await fetch('https://economia.awesomeapi.com.br/last/USD-BRL');
+            const dataDolar = await responseDolar.json();
+            const dolarValor = parseFloat(dataDolar.USDBRL.bid);
+            document.getElementById('resDolar').innerText = `R$ ${dolarValor.toFixed(2)}`;
 
-function calcular(){
-    // Inputs
-    const lucro = v(+document.getElementById('lucroPct').value) || 0;
-    const tokenBRL = v(+document.getElementById('tokenBRL').value);
-    const tokenSilver = v(+document.getElementById('tokenSilver').value);
-    const luckySilver = v(+document.getElementById('luckySilver').value);
+            // 2. BUSCA PREÇO DO TOKEN (Sua URL de referência)
+            // Substitua aqui: const minhaUrl = "https://www.geckoterminal.com/immutable-zkevm/pools/0xbe2930d274f862542740dcdc95257b3163172343?utm_source=coingecko&utm_medium=referral&utm_campaign=searchresults";
+            // Nota: Se o site não permitir fetch, o valor usado será o que estiver no input "Token Valor (USD)"
+            
+            /* EXEMPLO DE LOGICA PARA O SEU SITE:
+            const resSite = await fetch('SUA_URL_AQUI');
+            const html = await resSite.text();
+            // Aqui você precisaria de uma lógica para extrair o preço do HTML
+            */
 
-    // Cálculos Base
-    let custoMilhao = 0;
-    if (tokenBRL && tokenSilver) {
-        custoMilhao = (tokenBRL / tokenSilver) * 1000000;
+            calcular(dolarValor);
+
+            status.innerText = "✅ Valores atualizados com sucesso!";
+            status.style.color = "#00b894";
+        } catch (error) {
+            status.innerText = "⚠️ Erro ao buscar dólar. Usando valores manuais.";
+            status.style.color = "#ff7675";
+            calcular(5.00); // Valor padrão caso falhe
+        }
     }
 
-    // Atualiza Aba 0 (Custo Base)
-    document.getElementById('custoMilhaoBase').innerText = `R$ ${custoMilhao.toFixed(2)}`;
+    function calcular(dolar) {
+        // Captura valores dos inputs
+        const lucroPct = parseFloat(document.getElementById('lucroPct').value) / 100;
+        const tokenUSD = parseFloat(document.getElementById('tokenUSD').value);
+        const tokenSilver = parseFloat(document.getElementById('tokenSilver').value);
+        const luckySilver = parseFloat(document.getElementById('luckySilver').value);
 
-    // Atualiza Aba 1 (Venda em BRL)
-    const vendaBRL = custoMilhao * (1 + lucro / 100);
-    const elVendaSilver = document.getElementById('vendaSilverBRL');
-    const elInfoVenda = document.getElementById('infoVenda');
-    
-    if(vendaBRL > 0) {
-        elVendaSilver.innerText = `R$ ${vendaBRL.toFixed(2)}`;
-        elInfoVenda.innerText = `Com ${lucro}% de lucro sobre o custo do Token.`;
-    } else {
-        elVendaSilver.innerText = "R$ 0,00";
+        // Cálculos de Custo
+        const tokenBRL = tokenUSD * dolar;
+        const custoPorUmSilver = tokenBRL / tokenSilver;
+        const custoUmMilhao = custoPorUmSilver * 1000000;
+        const custoLucky = custoPorUmSilver * luckySilver;
+
+        // Cálculos de Venda (Custo + Lucro)
+        const vendaSilver = custoUmMilhao * (1 + lucroPct);
+        const vendaLucky = custoLucky * (1 + lucroPct);
+
+        // Exibição
+        document.getElementById('resTokenBRL').innerText = `R$ ${tokenBRL.toFixed(2)}`;
+        
+        document.getElementById('resVendaSilver').innerText = `R$ ${vendaSilver.toFixed(2)}`;
+        document.getElementById('lucroSilver').innerText = `Lucro líquido: R$ ${(vendaSilver - custoUmMilhao).toFixed(2)}`;
+
+        document.getElementById('resVendaLucky').innerText = `R$ ${vendaLucky.toFixed(2)}`;
+        document.getElementById('lucroLucky').innerText = `Lucro líquido: R$ ${(vendaLucky - custoLucky).toFixed(2)}`;
     }
-
-    // Atualiza Aba 2 (Lucky em Silver)
-    const elLucky = document.getElementById('vendaLuckySilver');
-    if(luckySilver) {
-        const precoLuckyVenda = Math.ceil(luckySilver * (1 + lucro / 100));
-        elLucky.innerText = `${precoLuckyVenda.toLocaleString()} Silver`;
-    } else {
-        elLucky.innerText = "0 Silver";
-    }
-}
-
-// Escutar todos os inputs
-document.querySelectorAll('input').forEach(i => i.addEventListener('input', calcular));
 </script>
 
 </body>
