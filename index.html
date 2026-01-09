@@ -149,26 +149,20 @@ function openTab(i){
 async function atualizarCotacao(){
     const tokenSilver = +document.getElementById('tokenSilver').value;
 
-    // GeckoTerminal (token USD)
-    const tokenRes = await fetch(
-        "https://api.geckoterminal.com/api/v2/simple/networks/eth/token_price/0x0000000000000000000000000000000000000000"
+    // CoinGecko – RavenQuest em BRL
+    const res = await fetch(
+        "https://api.coingecko.com/api/v3/simple/price?ids=ravenquest&vs_currencies=brl"
     );
-    const tokenData = await tokenRes.json();
-    const tokenUSD = Object.values(tokenData.data.attributes.token_prices)[0];
+    const data = await res.json();
+    const tokenBRL = data.ravenquest.brl;
 
-    // USD → BRL
-    const usdRes = await fetch("https://economia.awesomeapi.com.br/json/last/USD-BRL");
-    const usdData = await usdRes.json();
-    const usdBRL = +usdData.USDBRL.bid;
-
-    const tokenBRL = tokenUSD * usdBRL;
     valorSilverBRL = tokenBRL / tokenSilver;
 
     document.getElementById('resCotacao').innerHTML = `
     <img src="token_200x200.png">
-    Token: <b>R$ ${tokenBRL.toFixed(4)}</b><br>
+    Token RavenQuest: <b>R$ ${tokenBRL.toFixed(6)}</b><br>
     <img src="silver_200x200.png">
-    1.000.000 Silver: <b>R$ ${(valorSilverBRL*1_000_000).toFixed(2)}</b>
+    1.000.000 Silver: <b>R$ ${(valorSilverBRL * 1_000_000).toFixed(2)}</b>
     `;
 }
 
@@ -182,13 +176,14 @@ function compararLucky(){
     const luckyGame = +luckySilverGame.value;
     const pacote = +pacoteBRL1.value;
     const qtd = +qtdLucky1.value;
-    const lucro = +lucro1.value/100;
+    const lucro = +lucro1.value / 100;
 
     const custoLuckyBRL = pacote / qtd;
     const custoLuckySilver = custoLuckyBRL / valorSilverBRL;
     const precoVenda = custoLuckySilver * (1 + lucro);
 
-    const melhor = custoLuckySilver < luckyGame
+    const melhor =
+        custoLuckySilver < luckyGame
         ? "Comprar Lucky com BRL é mais barato"
         : "Comprar Lucky com Silver é mais barato";
 
@@ -211,7 +206,7 @@ function vendaLucky(){
 
     const pacote = +pacoteBRL2.value;
     const qtd = +qtdLucky2.value;
-    const lucro = +lucro2.value/100;
+    const lucro = +lucro2.value / 100;
 
     const custoLuckyBRL = pacote / qtd;
     const custoLuckySilver = custoLuckyBRL / valorSilverBRL;
