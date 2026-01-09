@@ -63,10 +63,6 @@ button.calc{
     border-radius:10px;
     line-height:1.6;
 }
-.warn{
-    color:#fbbf24;
-    font-size:0.9em;
-}
 </style>
 </head>
 
@@ -128,12 +124,11 @@ button.calc{
 </div>
 
 <script>
-// ================= CONFIGURAÇÕES =================
-const TOKEN_ADDRESS = "0xbe2930d274f862542740dcdc95257b3163172343";
+// ================= CONFIG =================
+const TOKEN_ADDRESS = "0x7d4cbeac2e92b0b45edb9a61f94f9f9db7bdc3c1"; // RavenQuest
 const NETWORK = "immutable-zkevm";
 const USD_BRL = 5.10; // taxa fixa configurável
 
-// ================= ESTADO GLOBAL =================
 let valorSilverBRL = 0;
 
 // ================= TABS =================
@@ -146,21 +141,17 @@ function openTab(i){
     });
 }
 
-// ================= ABA 3 — COTAÇÃO =================
+// ================= ABA 3 =================
 async function carregarCotacao(){
     try{
         const res = await fetch(
             `https://api.geckoterminal.com/api/v2/networks/${NETWORK}/tokens/${TOKEN_ADDRESS}`
         );
-
-        if(!res.ok) throw new Error("Falha na API");
-
         const json = await res.json();
 
         const tokenUSD = Number(json.data.attributes.price_usd);
-        if(!tokenUSD || tokenUSD <= 0) throw new Error("Preço inválido");
-
         const tokenBRL = tokenUSD * USD_BRL;
+
         const tokenSilver = Number(document.getElementById("tokenSilver").value);
 
         valorSilverBRL = tokenBRL / tokenSilver;
@@ -169,23 +160,17 @@ async function carregarCotacao(){
         Token (USD): <b>$ ${tokenUSD.toFixed(6)}</b><br>
         Token (BRL): <b>R$ ${tokenBRL.toFixed(6)}</b><br><br>
         1 Silver = <b>R$ ${valorSilverBRL.toFixed(8)}</b><br>
-        1.000.000 Silver = <b>R$ ${(valorSilverBRL * 1_000_000).toFixed(2)}</b>
+        1.000.000 Silver = <b>R$ ${(valorSilverBRL*1_000_000).toFixed(2)}</b><br>
+        <small>Fonte: GeckoTerminal (Token API)</small>
         `;
     }catch(e){
         document.getElementById("resCotacao").innerHTML =
-            "<span class='warn'>❌ Erro ao validar o preço do token</span>";
-        valorSilverBRL = 0;
+            "Erro ao carregar cotação do token.";
     }
 }
 
 // ================= ABA 1 =================
 function compararLucky(){
-    if(valorSilverBRL <= 0){
-        resComparar.innerHTML =
-            "<span class='warn'>⚠️ Cotação do token inválida</span>";
-        return;
-    }
-
     const luckyGame = Number(luckySilverGame.value);
     const pacote = Number(pacoteBRL1.value);
     const qtd = Number(qtdLucky1.value);
@@ -211,12 +196,6 @@ function compararLucky(){
 
 // ================= ABA 2 =================
 function vendaLucky(){
-    if(valorSilverBRL <= 0){
-        resVenda.innerHTML =
-            "<span class='warn'>⚠️ Cotação do token inválida</span>";
-        return;
-    }
-
     const pacote = Number(pacoteBRL2.value);
     const qtd = Number(qtdLucky2.value);
     const lucro = Number(lucro2.value) / 100;
