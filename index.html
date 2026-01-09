@@ -16,6 +16,7 @@ h1,h2{margin-top:0}
     display:flex;
     gap:10px;
     margin-bottom:20px;
+    flex-wrap:wrap;
 }
 .tabs button{
     padding:10px 16px;
@@ -63,6 +64,7 @@ button.calc{
     border-radius:10px;
     line-height:1.6;
 }
+small{color:#64748b}
 </style>
 </head>
 
@@ -71,13 +73,27 @@ button.calc{
 <h1>💰 Lucky Coin Calculator</h1>
 
 <div class="tabs">
-    <button class="active" onclick="openTab(0)">Comparar Lucky</button>
-    <button onclick="openTab(1)">Venda Lucky</button>
-    <button onclick="openTab(2)">Cotação Token</button>
+    <button class="active" onclick="openTab(0)">Cotação</button>
+    <button onclick="openTab(1)">Comparar Lucky</button>
+    <button onclick="openTab(2)">Venda Lucky</button>
+    <button onclick="openTab(3)">Venda Silver</button>
+</div>
+
+<!-- ABA 0 — COTAÇÃO -->
+<div class="section active">
+<h2>Cotação Token / Silver (Automática)</h2>
+
+<label>USD → BRL (configurável)</label>
+<input id="usdBrl" type="number" value="5.10" step="0.01">
+
+<label>1 Token equivale a quantos Silver (jogo)</label>
+<input id="tokenSilver" type="number" value="1000000">
+
+<div class="result" id="resCotacao">Carregando cotação...</div>
 </div>
 
 <!-- ABA 1 -->
-<div class="section active">
+<div class="section">
 <h2>Comparar compra da Lucky Coin</h2>
 
 <label>Preço da Lucky Coin em Silver (in-game)</label>
@@ -115,19 +131,18 @@ button.calc{
 
 <!-- ABA 3 -->
 <div class="section">
-<h2>Cotação Token / Silver (Automática)</h2>
+<h2>Venda de Silver</h2>
+<p><small>Conversão automática usando a cotação atual</small></p>
 
-<label>Valor de 1 Token em Silver (fixo do jogo)</label>
-<input id="tokenSilver" type="number" value="1000000">
-
-<div class="result" id="resCotacao">Carregando cotação...</div>
+<button class="calc" onclick="vendaSilver()">Calcular</button>
+<div class="result" id="resSilver"></div>
 </div>
 
 <script>
-const USD_BRL = 5.10; // taxa fixa
+const POOL_ID = "0xbe2930d274f862542740dcdc95257b3163172343";
 let valorSilverBRL = 0;
 
-// TABS
+// Tabs
 function openTab(i){
     document.querySelectorAll('.section').forEach((s,idx)=>{
         s.classList.toggle('active', idx===i);
@@ -137,29 +152,34 @@ function openTab(i){
     });
 }
 
-// COTAÇÃO AUTOMÁTICA (CoinGecko)
+// Cotação automática (GeckoTerminal)
 async function carregarCotacao(){
     try{
         const res = await fetch(
-            "https://api.coingecko.com/api/v3/simple/price?ids=ravenquest&vs_currencies=usd"
+            `https://api.geckoterminal.com/api/v2/networks/immutable-zkevm/pools/${POOL_ID}`
         );
-        const data = await res.json();
+        const json = await res.json();
 
-        const tokenUSD = data.ravenquest.usd;
-        const tokenBRL = tokenUSD * USD_BRL;
+        const tokenUSD = Number(
+            json.data.attributes.base_token_price_usd
+        );
 
-        const tokenSilver = Number(document.getElementById("tokenSilver").value);
+        if(!tokenUSD || isNaN(tokenUSD)) throw "Preço inválido";
+
+        const usdBrl = Number(usdBrlInput.value);
+        const tokenBRL = tokenUSD * usdBrl;
+        const tokenSilver = Number(tokenSilverInput.value);
+
         valorSilverBRL = tokenBRL / tokenSilver;
 
-        document.getElementById("resCotacao").innerHTML = `
+        resCotacao.innerHTML = `
         Token (USD): <b>$ ${tokenUSD.toFixed(6)}</b><br>
         Token (BRL): <b>R$ ${tokenBRL.toFixed(6)}</b><br><br>
         1 Silver = <b>R$ ${valorSilverBRL.toFixed(8)}</b><br>
         1.000.000 Silver = <b>R$ ${(valorSilverBRL*1_000_000).toFixed(2)}</b>
         `;
     }catch{
-        document.getElementById("resCotacao").innerHTML =
-            "Erro ao carregar cotação.";
+        resCotacao.innerHTML = "❌ Erro ao validar preço do token.";
     }
 }
 
@@ -174,11 +194,14 @@ function compararLucky(){
     const custoLuckySilver = custoLuckyBRL / valorSilverBRL;
     const precoVenda = custoLuckySilver * (1+lucro);
 
+    const melhor =
+        custoLuckySilver < luckyGame ? "BRL" : "Silver";
+
     resComparar.innerHTML = `
     Lucky via Silver: <b>${luckyGame.toFixed(0)} Silver</b><br>
-    Lucky via BRL: <b>${custoLuckySilver.toFixed(0)} Silver</b><br><br>
-    Preço ideal de venda:<br>
-    <b>${precoVenda.toFixed(0)} Silver</b>
+    Lucky via BRL: <b>${custoLuckySilver.toFixed(0)} Silver</b><br>
+    Mais barata: <b>${melhor}</b><br><br>
+    Venda ideal: <b>${precoVenda.toFixed(0)} Silver</b>
     `;
 }
 
@@ -188,18 +211,30 @@ function vendaLucky(){
     const qtd = Number(qtdLucky2.value);
     const lucro = Number(lucro2.value)/100;
 
-    const custoLuckyBRL = pacote / qtd;
-    const custoLuckySilver = custoLuckyBRL / valorSilverBRL;
-    const precoVenda = custoLuckySilver * (1+lucro);
+    const custoLuckySilver = (pacote/qtd)/valorSilverBRL;
+    const precoVenda = custoLuckySilver*(1+lucro);
 
     resVenda.innerHTML = `
-    Custo da Lucky: <b>${custoLuckySilver.toFixed(0)} Silver</b><br>
-    Preço ideal de venda:<br>
-    <strong>${precoVenda.toFixed(0)} Silver</strong>
+    Custo: <b>${custoLuckySilver.toFixed(0)} Silver</b><br>
+    Venda ideal: <b>${precoVenda.toFixed(0)} Silver</b>
     `;
 }
 
-document.getElementById("tokenSilver").addEventListener("change", carregarCotacao);
+// ABA 3
+function vendaSilver(){
+    resSilver.innerHTML = `
+    1.000.000 Silver = 
+    <b>R$ ${(valorSilverBRL*1_000_000).toFixed(2)}</b>
+    `;
+}
+
+// aliases
+const usdBrlInput = document.getElementById("usdBrl");
+const tokenSilverInput = document.getElementById("tokenSilver");
+
+// init
+usdBrlInput.onchange = carregarCotacao;
+tokenSilverInput.onchange = carregarCotacao;
 carregarCotacao();
 </script>
 
