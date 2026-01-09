@@ -2,194 +2,226 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Lucky Coin Calculator</title>
+<title>Lucky Coin – Calculadora Profissional</title>
+
 <style>
-body {
-    font-family: Arial, sans-serif;
-    background: #0f172a;
-    color: #e5e7eb;
-    margin: 0;
-    padding: 20px;
+body{
+    background:#0b1020;
+    color:#e5e7eb;
+    font-family:Arial, Helvetica, sans-serif;
+    padding:20px;
 }
-h2 { margin-top: 0 }
-.tabs {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
+h1,h2{margin-top:0}
+.tabs{
+    display:flex;
+    gap:10px;
+    margin-bottom:20px;
 }
-button {
-    padding: 10px 15px;
-    border: none;
-    cursor: pointer;
-    background: #1e293b;
-    color: #fff;
-    border-radius: 6px;
+.tabs button{
+    padding:10px 16px;
+    border:none;
+    border-radius:8px;
+    background:#1e293b;
+    color:#fff;
+    cursor:pointer;
 }
-button.active {
-    background: #2563eb;
+.tabs button.active{
+    background:#2563eb;
 }
-.section {
-    display: none;
-    background: #020617;
-    padding: 20px;
-    border-radius: 10px;
+.section{
+    display:none;
+    background:#020617;
+    padding:20px;
+    border-radius:14px;
 }
-.section.active {
-    display: block;
+.section.active{display:block}
+label{
+    font-size:0.9em;
+    color:#94a3b8;
 }
-input {
-    width: 100%;
-    padding: 8px;
-    margin: 6px 0 12px;
-    border-radius: 6px;
-    border: none;
+input{
+    width:100%;
+    padding:10px;
+    margin:6px 0 14px;
+    border-radius:8px;
+    border:none;
 }
-.result {
-    background: #020617;
-    padding: 10px;
-    border-radius: 6px;
-    margin-top: 10px;
+button.calc{
+    width:100%;
+    padding:12px;
+    background:#22c55e;
+    border:none;
+    border-radius:10px;
+    font-size:1em;
+    font-weight:bold;
+    cursor:pointer;
 }
-small {
-    opacity: 0.7;
+.result{
+    margin-top:15px;
+    background:#020617;
+    padding:14px;
+    border-radius:10px;
+    line-height:1.5;
+}
+img{
+    width:40px;
+    vertical-align:middle;
+    margin-right:8px;
 }
 </style>
 </head>
+
 <body>
 
-<h1>💰 Lucky Coin Tool</h1>
+<h1>💰 Lucky Coin Calculator</h1>
 
 <div class="tabs">
-    <button class="active" onclick="openTab(0)">Comparar Compra</button>
-    <button onclick="openTab(1)">Venda Lucky Coin</button>
-    <button onclick="openTab(2)">Cotação Token / Silver</button>
+    <button class="active" onclick="openTab(0)">Comparar Lucky</button>
+    <button onclick="openTab(1)">Venda Lucky</button>
+    <button onclick="openTab(2)">Cotação Token</button>
 </div>
 
-<!-- ABA 1 -->
+<!-- ================= ABA 1 ================= -->
 <div class="section active">
-    <h2>🟢 Comparar compra da Lucky Coin</h2>
+<h2>🟢 Comparar compra da Lucky Coin</h2>
 
-    <label>Preço da Lucky Coin em Silver (in-game)</label>
-    <input type="number" id="silverLucky">
+<label>Preço da Lucky Coin em Silver (in-game)</label>
+<input id="luckySilverGame" type="number">
 
-    <label>Preço do pacote em BRL</label>
-    <input type="number" id="pacoteBRL">
+<label>Preço do pacote de Lucky Coin (BRL)</label>
+<input id="pacoteBRL1" type="number">
 
-    <label>Quantidade de Lucky Coins no pacote</label>
-    <input type="number" id="qtdLucky">
+<label>Quantidade de Lucky Coin no pacote</label>
+<input id="qtdLucky1" type="number">
 
-    <button onclick="compararCompra()">Calcular</button>
+<label>Margem de lucro desejada (%)</label>
+<input id="lucro1" type="number">
 
-    <div class="result" id="resultadoComparacao"></div>
+<button class="calc" onclick="compararLucky()">Calcular</button>
+
+<div class="result" id="resComparar"></div>
 </div>
 
-<!-- ABA 2 -->
+<!-- ================= ABA 2 ================= -->
 <div class="section">
-    <h2>🟢 Venda da Lucky Coin por Silver</h2>
+<h2>🟢 Venda da Lucky Coin por Silver</h2>
 
-    <label>Preço do pacote em BRL</label>
-    <input type="number" id="pacoteBRLVenda">
+<label>Preço do pacote de Lucky Coin (BRL)</label>
+<input id="pacoteBRL2" type="number">
 
-    <label>Quantidade de Lucky Coins no pacote</label>
-    <input type="number" id="qtdLuckyVenda">
+<label>Quantidade de Lucky Coin no pacote</label>
+<input id="qtdLucky2" type="number">
 
-    <label>Margem de lucro (%)</label>
-    <input type="number" id="lucro">
+<label>Margem de lucro (%)</label>
+<input id="lucro2" type="number">
 
-    <button onclick="calcularVenda()">Calcular</button>
+<button class="calc" onclick="vendaLucky()">Calcular</button>
 
-    <div class="result" id="resultadoVenda"></div>
+<div class="result" id="resVenda"></div>
 </div>
 
-<!-- ABA 3 -->
+<!-- ================= ABA 3 ================= -->
 <div class="section">
-    <h2>🟢 Cotação Token / Silver</h2>
+<h2>🟢 Cotação Token / Silver</h2>
 
-    <label>Quantidade de Silver correspondente a 1 Token</label>
-    <input type="number" id="silverPorToken">
+<label>Preço de 1 Token em Silver</label>
+<input id="tokenSilver" type="number">
 
-    <button onclick="buscarCotacao()">Buscar Cotação</button>
+<button class="calc" onclick="atualizarCotacao()">Atualizar Cotação</button>
 
-    <div class="result" id="resultadoCotacao"></div>
+<div class="result" id="resCotacao"></div>
 </div>
 
 <script>
 let valorSilverBRL = 0;
 
-function openTab(index) {
-    document.querySelectorAll('.section').forEach((s, i) => {
-        s.classList.toggle('active', i === index);
+// -------- TABS ----------
+function openTab(i){
+    document.querySelectorAll('.section').forEach((s,idx)=>{
+        s.classList.toggle('active', idx===i);
     });
-    document.querySelectorAll('button').forEach((b, i) => {
-        if (i < 3) b.classList.toggle('active', i === index);
+    document.querySelectorAll('.tabs button').forEach((b,idx)=>{
+        b.classList.toggle('active', idx===i);
     });
 }
 
-// ABA 1
-function compararCompra() {
-    if (valorSilverBRL === 0) {
-        alert("Atualize a cotação na Aba 3 primeiro.");
-        return;
-    }
+// -------- ABA 3 ----------
+async function atualizarCotacao(){
+    const tokenSilver = +document.getElementById('tokenSilver').value;
 
-    const silverLucky = Number(silverLucky.value);
-    const pacote = Number(pacoteBRL.value);
-    const qtd = Number(qtdLucky.value);
+    // GeckoTerminal (token USD)
+    const tokenRes = await fetch(
+        "https://api.geckoterminal.com/api/v2/simple/networks/eth/token_price/0x0000000000000000000000000000000000000000"
+    );
+    const tokenData = await tokenRes.json();
+    const tokenUSD = Object.values(tokenData.data.attributes.token_prices)[0];
 
-    const custoLuckyBRL = pacote / qtd;
-    const custoLuckySilverViaBRL = custoLuckyBRL / valorSilverBRL;
+    // USD → BRL
+    const usdRes = await fetch("https://economia.awesomeapi.com.br/json/last/USD-BRL");
+    const usdData = await usdRes.json();
+    const usdBRL = +usdData.USDBRL.bid;
 
-    let melhor =
-        custoLuckySilverViaBRL < silverLucky
-        ? "Comprar Lucky com BRL é mais barato"
-        : "Comprar Lucky com Silver é mais barato";
+    const tokenBRL = tokenUSD * usdBRL;
+    valorSilverBRL = tokenBRL / tokenSilver;
 
-    resultadoComparacao.innerHTML = `
-    Lucky via Silver: <b>${silverLucky.toLocaleString()} Silver</b><br>
-    Lucky via BRL: <b>${custoLuckySilverViaBRL.toLocaleString()} Silver</b><br><br>
-    <strong>${melhor}</strong>
+    document.getElementById('resCotacao').innerHTML = `
+    <img src="token_200x200.png">
+    Token: <b>R$ ${tokenBRL.toFixed(4)}</b><br>
+    <img src="silver_200x200.png">
+    1.000.000 Silver: <b>R$ ${(valorSilverBRL*1_000_000).toFixed(2)}</b>
     `;
 }
 
-// ABA 2
-function calcularVenda() {
-    if (valorSilverBRL === 0) {
+// -------- ABA 1 ----------
+function compararLucky(){
+    if(!valorSilverBRL){
         alert("Atualize a cotação na Aba 3 primeiro.");
         return;
     }
 
-    const pacote = Number(pacoteBRLVenda.value);
-    const qtd = Number(qtdLuckyVenda.value);
-    const lucro = Number(lucro.value) / 100;
+    const luckyGame = +luckySilverGame.value;
+    const pacote = +pacoteBRL1.value;
+    const qtd = +qtdLucky1.value;
+    const lucro = +lucro1.value/100;
 
     const custoLuckyBRL = pacote / qtd;
     const custoLuckySilver = custoLuckyBRL / valorSilverBRL;
     const precoVenda = custoLuckySilver * (1 + lucro);
 
-    resultadoVenda.innerHTML = `
-    Custo por Lucky: <b>${custoLuckySilver.toLocaleString()} Silver</b><br>
-    Preço ideal de venda: <b>${precoVenda.toLocaleString()} Silver</b>
+    const melhor = custoLuckySilver < luckyGame
+        ? "Comprar Lucky com BRL é mais barato"
+        : "Comprar Lucky com Silver é mais barato";
+
+    resComparar.innerHTML = `
+    <img src="lucky_200x200.png">
+    Lucky via Silver: <b>${luckyGame.toLocaleString()} Silver</b><br>
+    Lucky via BRL: <b>${custoLuckySilver.toLocaleString()} Silver</b><br><br>
+    <strong>${melhor}</strong><br><br>
+    Preço ideal de venda (com lucro):<br>
+    <b>${precoVenda.toLocaleString()} Silver</b>
     `;
 }
 
-// ABA 3
-async function buscarCotacao() {
-    const silverToken = Number(silverPorToken.value);
+// -------- ABA 2 ----------
+function vendaLucky(){
+    if(!valorSilverBRL){
+        alert("Atualize a cotação na Aba 3 primeiro.");
+        return;
+    }
 
-    const tokenRes = await fetch("https://api.geckoterminal.com/api/v2/simple/networks/eth/token_price/0x0000000000000000000000000000000000000000");
-    const tokenData = await tokenRes.json();
-    const tokenUSD = Object.values(tokenData.data.attributes.token_prices)[0];
+    const pacote = +pacoteBRL2.value;
+    const qtd = +qtdLucky2.value;
+    const lucro = +lucro2.value/100;
 
-    const usdRes = await fetch("https://economia.awesomeapi.com.br/json/last/USD-BRL");
-    const usdData = await usdRes.json();
-    const usdBRL = Number(usdData.USDBRL.bid);
+    const custoLuckyBRL = pacote / qtd;
+    const custoLuckySilver = custoLuckyBRL / valorSilverBRL;
+    const precoVenda = custoLuckySilver * (1 + lucro);
 
-    const tokenBRL = tokenUSD * usdBRL;
-    valorSilverBRL = tokenBRL / silverToken;
-
-    resultadoCotacao.innerHTML = `
-    Token: <b>R$ ${tokenBRL.toFixed(4)}</b><br>
-    1.000.000 Silver: <b>R$ ${(valorSilverBRL * 1_000_000).toFixed(2)}</b>
+    resVenda.innerHTML = `
+    <img src="lucky_200x200.png">
+    Custo da Lucky: <b>${custoLuckySilver.toLocaleString()} Silver</b><br>
+    Preço ideal de venda:<br>
+    <strong>${precoVenda.toLocaleString()} Silver</strong>
     `;
 }
 </script>
